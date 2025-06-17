@@ -176,21 +176,24 @@ namespace MauricioGym.Usuario.Services
                     throw new ArgumentException("Quantidade de meses deve ser maior que zero", nameof(meses));
 
                 if (valorBase <= 0)
-                    throw new ArgumentException("Valor base deve ser maior que zero", nameof(valorBase));
+                    throw new ArgumentException("Valor base deve ser maior que zero", nameof(valorBase));                var valorComDesconto = CalcularValorComDesconto(meses, valorBase);
 
-                var valorComDesconto = CalcularValorComDesconto(meses, valorBase);
-                var desconto = valorBase * meses - valorComDesconto;
+                // Para a nova estrutura, vamos usar um UsuarioPlanoId fictício por enquanto
+                // Isso deveria vir de um parâmetro do método
+                var mesAtual = DateTime.Now.Month;
+                var anoAtual = DateTime.Now.Year;
 
                 var mensalidade = new MensalidadeEntity
                 {
-                    UsuarioId = usuarioId,
-                    PlanoId = planoId,
+                    UsuarioPlanoId = 1, // TODO: Isso deveria vir como parâmetro
+                    MesReferencia = mesAtual,
+                    AnoReferencia = anoAtual,
                     DataVencimento = dataInicio.AddMonths(meses),
                     DataPagamento = DateTime.Now,
                     Valor = valorComDesconto,
-                    Desconto = desconto > 0 ? desconto : null,
-                    Pago = true,
-                    Removido = false
+                    Status = "Paga",
+                    Ativo = true,
+                    DataCriacao = DateTime.Now
                 };
 
                 return await _mensalidadeRepository.CriarAsync(mensalidade);

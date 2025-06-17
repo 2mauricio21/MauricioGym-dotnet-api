@@ -12,15 +12,13 @@ namespace MauricioGym.Usuario.Repositories.SqlServer
         public MensalidadeSqlServerRepository(string connectionString)
         {
             _connectionString = connectionString;
-        }
-
-        public async Task<IEnumerable<MensalidadeEntity>> ObterTodosAsync()
+        }        public async Task<IEnumerable<MensalidadeEntity>> ObterTodosAsync()
         {
             using var connection = new SqlConnection(_connectionString);
             const string sql = @"
-                SELECT Id, UsuarioId, PlanoId, DataVencimento, DataPagamento, Valor, Desconto, Pago, Removido 
+                SELECT Id, UsuarioPlanoId, MesReferencia, AnoReferencia, Valor, DataVencimento, DataPagamento, Status, Ativo, DataCriacao, DataAtualizacao 
                 FROM Mensalidade 
-                WHERE Removido = 0
+                WHERE Ativo = 1
                 ORDER BY DataVencimento DESC";
             
             return await connection.QueryAsync<MensalidadeEntity>(sql);
@@ -30,9 +28,9 @@ namespace MauricioGym.Usuario.Repositories.SqlServer
         {
             using var connection = new SqlConnection(_connectionString);
             const string sql = @"
-                SELECT Id, UsuarioId, PlanoId, DataVencimento, DataPagamento, Valor, Desconto, Pago, Removido 
+                SELECT Id, UsuarioPlanoId, MesReferencia, AnoReferencia, Valor, DataVencimento, DataPagamento, Status, Ativo, DataCriacao, DataAtualizacao 
                 FROM Mensalidade 
-                WHERE Id = @Id AND Removido = 0";
+                WHERE Id = @Id AND Ativo = 1";
             
             return await connection.QueryFirstOrDefaultAsync<MensalidadeEntity>(sql, new { Id = id });
         }
