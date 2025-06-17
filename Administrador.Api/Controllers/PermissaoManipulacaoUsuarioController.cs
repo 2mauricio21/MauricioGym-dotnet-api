@@ -17,14 +17,26 @@ namespace MauricioGym.Administrador.Api.Controllers
             _permissaoService = permissaoService;
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<PermissaoManipulacaoUsuarioEntity>> ObterPorId(int id)
+        /// <summary>
+        /// Obtém uma permissão específica por ID
+        /// </summary>
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<PermissaoManipulacaoUsuarioEntity>> ObterPorId([FromRoute] int id)
         {
-            var permissao = await _permissaoService.ObterPorIdAsync(id);
-            if (permissao == null) return NotFound();
-            return Ok(permissao);
+            try
+            {
+                var permissao = await _permissaoService.ObterPorIdAsync(id);
+                if (permissao == null) return NotFound($"Permissão com ID {id} não encontrada");
+                return Ok(permissao);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro ao obter permissão: {ex.Message}");
+            }
         }
-
+        /// <summary>
+        /// Lista permissões por usuário
+        /// </summary>
         [HttpGet("usuario/{usuarioId}")]
         public async Task<ActionResult<IEnumerable<PermissaoManipulacaoUsuarioEntity>>> ListarPorUsuario(int usuarioId)
         {
@@ -32,6 +44,9 @@ namespace MauricioGym.Administrador.Api.Controllers
             return Ok(permissoes);
         }
 
+        /// <summary>
+        /// Cria uma nova permissão de manipulação de usuário
+        /// </summary>
         [HttpPost]
         public async Task<ActionResult<int>> Criar([FromBody] PermissaoManipulacaoUsuarioEntity permissao)
         {
@@ -39,6 +54,9 @@ namespace MauricioGym.Administrador.Api.Controllers
             return CreatedAtAction(nameof(ObterPorId), new { id }, id);
         }
 
+        /// <summary>
+        /// Atualiza uma permissão existente
+        /// </summary>
         [HttpPut("{id}")]
         public async Task<ActionResult> Atualizar(int id, [FromBody] PermissaoManipulacaoUsuarioEntity permissao)
         {
@@ -48,6 +66,9 @@ namespace MauricioGym.Administrador.Api.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Remove uma permissão (remoção lógica)
+        /// </summary>
         [HttpDelete("{id}")]
         public async Task<ActionResult> Remover(int id)
         {
