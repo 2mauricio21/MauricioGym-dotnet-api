@@ -81,12 +81,19 @@ Este script cria o banco `MauricioGymDB` com todas as tabelas e dados de exemplo
 
 ```bash
 # Execute o script que testa tudo automaticamente
-testar-apis.bat
+testar-completo.bat
 ```
 
 Este script compila a solução e executa todos os testes unitários para garantir que tudo está funcionando corretamente.
 
 ### 3. Executar as APIs
+
+```bash
+# Execute o script para iniciar as APIs
+executar-apis.bat
+```
+
+Este script verifica o ambiente, executa os testes principais e permite iniciar as APIs do sistema interativamente.
 
 Você pode iniciar cada API independentemente:
 
