@@ -1,0 +1,11 @@
+using MauricioGym.Usuario.Entities;
+
+namespace MauricioGym.Usuario.Services.Interfaces
+{
+    public interface IPlanoService
+    {
+        Task<IEnumerable<PlanoEntity>> ObterTodosAsync();
+        Task<PlanoEntity?> ObterPorIdAsync(int id);
+        Task<bool> ExisteAsync(int id);
+    }
+}
