@@ -3,27 +3,26 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MauricioGym", "MauricioGym", "{1DC39067-F116-4C82-B8A3-7F85507776A5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MauricioGym.Administrador", "MauricioGym.Administrador\MauricioGym.Administrador.csproj", "{281FAC57-437B-4602-AE43-7E0C15897EDC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MauricioGym.Administrador", "MauricioGym.Administrador\MauricioGym.Administrador.csproj", "{281FAC57-437B-4602-AE43-7E0C15897EDC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MauricioGym.Usuario", "MauricioGym.Usuario\MauricioGym.Usuario.csproj", "{9394F5FB-D07F-459D-9A97-601A9C68618E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MauricioGym.Usuario", "MauricioGym.Usuario\MauricioGym.Usuario.csproj", "{9394F5FB-D07F-459D-9A97-601A9C68618E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MauricioGym.Administrador.Api", "MauricioGym.Administrador.Api\MauricioGym.Administrador.Api.csproj", "{A6EE5539-0946-4E67-BC17-F27BEED6589A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MauricioGym.Administrador.Api", "MauricioGym.Administrador.Api\MauricioGym.Administrador.Api.csproj", "{A6EE5539-0946-4E67-BC17-F27BEED6589A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MauricioGym.Usuario.Api", "MauricioGym.Usuario.Api\MauricioGym.Usuario.Api.csproj", "{77C03297-F0A9-48CA-BE66-BB0425C13FB3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MauricioGym.Usuario.Api", "MauricioGym.Usuario.Api\MauricioGym.Usuario.Api.csproj", "{77C03297-F0A9-48CA-BE66-BB0425C13FB3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MauricioGym.Administrador.Testes", "MauricioGym.Administrador.Testes\MauricioGym.Administrador.Testes.csproj", "{D0F641B6-09AD-4A3C-ADE7-1FE3E5CEDCA3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MauricioGym.Administrador.Testes", "MauricioGym.Administrador.Testes\MauricioGym.Administrador.Testes.csproj", "{D0F641B6-09AD-4A3C-ADE7-1FE3E5CEDCA3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MauricioGym.Usuario.Testes", "MauricioGym.Usuario.Testes\MauricioGym.Usuario.Testes.csproj", "{7E60FCAC-331E-4C80-AF25-174FAE6CF7E7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MauricioGym.Usuario.Testes", "MauricioGym.Usuario.Testes\MauricioGym.Usuario.Testes.csproj", "{7E60FCAC-331E-4C80-AF25-174FAE6CF7E7}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Administrador", "Administrador", "{CD62E99B-C985-4038-BE41-21474A4BCA19}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Usuario", "Usuario", "{B4FA3203-9F93-437A-82F5-9755079B28E7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{281FAC57-437B-4602-AE43-7E0C15897EDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -51,8 +50,15 @@ Global
 		{7E60FCAC-331E-4C80-AF25-174FAE6CF7E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7E60FCAC-331E-4C80-AF25-174FAE6CF7E7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{281FAC57-437B-4602-AE43-7E0C15897EDC} = {1DC39067-F116-4C82-B8A3-7F85507776A5}
-		{9394F5FB-D07F-459D-9A97-601A9C68618E} = {1DC39067-F116-4C82-B8A3-7F85507776A5}
+		{281FAC57-437B-4602-AE43-7E0C15897EDC} = {CD62E99B-C985-4038-BE41-21474A4BCA19}
+		{9394F5FB-D07F-459D-9A97-601A9C68618E} = {B4FA3203-9F93-437A-82F5-9755079B28E7}
+		{A6EE5539-0946-4E67-BC17-F27BEED6589A} = {CD62E99B-C985-4038-BE41-21474A4BCA19}
+		{77C03297-F0A9-48CA-BE66-BB0425C13FB3} = {B4FA3203-9F93-437A-82F5-9755079B28E7}
+		{D0F641B6-09AD-4A3C-ADE7-1FE3E5CEDCA3} = {CD62E99B-C985-4038-BE41-21474A4BCA19}
+		{7E60FCAC-331E-4C80-AF25-174FAE6CF7E7} = {B4FA3203-9F93-437A-82F5-9755079B28E7}
 	EndGlobalSection
 EndGlobal
