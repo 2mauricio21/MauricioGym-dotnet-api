@@ -5,17 +5,17 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MauricioGym", "MauricioGym", "{1DC39067-F116-4C82-B8A3-7F85507776A5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MauricioGym.Administrador", "Administrador\MauricioGym.Administrador.csproj", "{281FAC57-437B-4602-AE43-7E0C15897EDC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MauricioGym.Administrador", "MauricioGym.Administrador\MauricioGym.Administrador.csproj", "{281FAC57-437B-4602-AE43-7E0C15897EDC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MauricioGym.Usuario", "Usuario\MauricioGym.Usuario.csproj", "{9394F5FB-D07F-459D-9A97-601A9C68618E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MauricioGym.Usuario", "MauricioGym.Usuario\MauricioGym.Usuario.csproj", "{9394F5FB-D07F-459D-9A97-601A9C68618E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MauricioGym.Administrador.Api", "Administrador.Api\MauricioGym.Administrador.Api.csproj", "{A6EE5539-0946-4E67-BC17-F27BEED6589A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MauricioGym.Administrador.Api", "MauricioGym.Administrador.Api\MauricioGym.Administrador.Api.csproj", "{A6EE5539-0946-4E67-BC17-F27BEED6589A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MauricioGym.Usuario.Api", "Usuario.Api\MauricioGym.Usuario.Api.csproj", "{77C03297-F0A9-48CA-BE66-BB0425C13FB3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MauricioGym.Usuario.Api", "MauricioGym.Usuario.Api\MauricioGym.Usuario.Api.csproj", "{77C03297-F0A9-48CA-BE66-BB0425C13FB3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MauricioGym.Administrador.Testes", "Administrador.Testes\MauricioGym.Administrador.Testes.csproj", "{D0F641B6-09AD-4A3C-ADE7-1FE3E5CEDCA3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MauricioGym.Administrador.Testes", "MauricioGym.Administrador.Testes\MauricioGym.Administrador.Testes.csproj", "{D0F641B6-09AD-4A3C-ADE7-1FE3E5CEDCA3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MauricioGym.Usuario.Testes", "Usuario.Testes\MauricioGym.Usuario.Testes.csproj", "{7E60FCAC-331E-4C80-AF25-174FAE6CF7E7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MauricioGym.Usuario.Testes", "MauricioGym.Usuario.Testes\MauricioGym.Usuario.Testes.csproj", "{7E60FCAC-331E-4C80-AF25-174FAE6CF7E7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -46,7 +46,7 @@ echo [OK] Build da solucao concluido com sucesso!
 echo.
 
 echo [3] Executando Testes do Administrador...
-dotnet test Administrador.Testes\MauricioGym.Administrador.Testes.csproj --nologo --verbosity minimal
+dotnet test MauricioGym.Administrador.Testes\MauricioGym.Administrador.Testes.csproj --nologo --verbosity minimal
 if %errorlevel% neq 0 (
     echo [ERRO] Falha nos testes do Administrador!
     echo.
@@ -57,7 +57,7 @@ echo [OK] Testes do Administrador passaram com sucesso!
 echo.
 
 echo [4] Executando Testes do Usuario...
-dotnet test Usuario.Testes\MauricioGym.Usuario.Testes.csproj --nologo --verbosity minimal
+dotnet test MauricioGym.Usuario.Testes\MauricioGym.Usuario.Testes.csproj --nologo --verbosity minimal
 if %errorlevel% neq 0 (
     echo [ERRO] Falha nos testes do Usuario!
     echo.
@@ -77,12 +77,12 @@ echo.
 echo  [A] API ADMINISTRADOR:
 echo     URL: http://localhost:5001
 echo     Swagger: http://localhost:5001/swagger
-echo     Comando: dotnet run --project Administrador.Api\MauricioGym.Administrador.Api.csproj
+echo     Comando: dotnet run --project MauricioGym.Administrador.Api\MauricioGym.Administrador.Api.csproj
 echo.
 echo  [U] API USUARIO:
 echo     URL: http://localhost:5002  
 echo     Swagger: http://localhost:5002/swagger
-echo     Comando: dotnet run --project Usuario.Api\MauricioGym.Usuario.Api.csproj
+echo     Comando: dotnet run --project MauricioGym.Usuario.Api\MauricioGym.Usuario.Api.csproj
 echo.
 echo ================================================================================
 echo.
@@ -100,20 +100,18 @@ if errorlevel 4 (
     echo Nenhuma API iniciada. Execute este script novamente quando desejar iniciar as APIs.
 ) else if errorlevel 3 (    echo.
     echo Iniciando ambas as APIs em janelas separadas...
-    start "API Administrador" cmd /c "dotnet run --project Administrador.Api\MauricioGym.Administrador.Api.csproj --environment Development & pause"
-    start "API Usuario" cmd /c "dotnet run --project Usuario.Api\MauricioGym.Usuario.Api.csproj --environment Development & pause"
+    start "API Administrador" cmd /c "dotnet run --project MauricioGym.Administrador.Api\MauricioGym.Administrador.Api.csproj --environment Development & pause"
+    start "API Usuario" cmd /c "dotnet run --project MauricioGym.Usuario.Api\MauricioGym.Usuario.Api.csproj --environment Development & pause"
     echo [OK] Ambas as APIs foram iniciadas!
     echo  - API Administrador: http://localhost:5001/swagger
     echo  - API Usuario: http://localhost:5002/swagger
-) else if errorlevel 2 (
-    echo.
+) else if errorlevel 2 (    echo.
     echo Iniciando API Usuario...
-    start "API Usuario" cmd /c "dotnet run --project Usuario.Api\MauricioGym.Usuario.Api.csproj --environment Development & pause"
+    start "API Usuario" cmd /c "dotnet run --project MauricioGym.Usuario.Api\MauricioGym.Usuario.Api.csproj --environment Development & pause"
     echo [OK] API Usuario iniciada! Acesse: http://localhost:5002/swagger
-) else (
-    echo.
+) else (    echo.
     echo Iniciando API Administrador...
-    start "API Administrador" cmd /c "dotnet run --project Administrador.Api\MauricioGym.Administrador.Api.csproj --environment Development & pause"
+    start "API Administrador" cmd /c "dotnet run --project MauricioGym.Administrador.Api\MauricioGym.Administrador.Api.csproj --environment Development & pause"
     echo [OK] API Administrador iniciada! Acesse: http://localhost:5001/swagger
 )
 
