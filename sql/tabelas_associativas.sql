@@ -1,3 +1,7 @@
+-- Usar o banco de dados MauricioGym
+USE MauricioGymDB;
+GO
+
 -- Tabela associativa para vincular Pessoa a Plano
 CREATE TABLE PessoaPlano (
     Id INT IDENTITY(1,1) PRIMARY KEY,

@@ -12,7 +12,7 @@ Sistema de gerenciamento de academia desenvolvido em .NET 8, com arquitetura lim
 
 ### Pré-requisitos
 - .NET 8 SDK
-- SQL Server (local ou remoto)
+- SQL Server LocalDB (incluído no Visual Studio ou SQL Server Express)
 
 ### 1. Clonar o Repositório
 ```bash
@@ -20,24 +20,40 @@ git clone <url-do-repositorio>
 cd MauricioGym
 ```
 
-### 2. Configurar String de Conexão
-Edite o arquivo `MauricioGym.Api/appsettings.json`:
+### 2. Setup Automático do Banco de Dados
+
+**Opção A - Script Automático (Recomendado):**
+```bash
+# Execute o script que faz tudo automaticamente
+setup-banco.bat
+```
+
+**Opção B - Manual:**
+```bash
+# Execute o script SQL completo
+sqlcmd -S "(localdb)\mssqllocaldb" -i "sql\setup_completo.sql"
+```
+
+> ⚠️ **Importante**: O script automático cria o banco `MauricioGymDB` com todas as tabelas e dados de exemplo. Se o banco já existir, ele será recriado (dados anteriores serão perdidos).
+
+### 3. Configuração da String de Conexão
+A string de conexão já está configurada para LocalDB em `MauricioGym.Api/appsettings.json`:
 ```json
 {
   "ConnectionStrings": {
-    "SqlServer": "Server=localhost;Database=MauricioGymDB;Trusted_Connection=true;TrustServerCertificate=true;"
+    "SqlServer": "Server=(localdb)\\mssqllocaldb;Database=MauricioGymDB;Trusted_Connection=true;TrustServerCertificate=true;"
   }
 }
 ```
 
-### 3. Executar a API
+### 4. Executar a API
 ```bash
 dotnet run --project MauricioGym.Api
 ```
 
 A API estará disponível em: `http://localhost:5000`
 
-### 4. Executar os Testes
+### 5. Executar os Testes
 ```bash
 dotnet test
 ```
