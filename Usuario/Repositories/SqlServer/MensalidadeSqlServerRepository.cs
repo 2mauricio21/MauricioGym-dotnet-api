@@ -12,7 +12,9 @@ namespace MauricioGym.Usuario.Repositories.SqlServer
         public MensalidadeSqlServerRepository(string connectionString)
         {
             _connectionString = connectionString;
-        }        public async Task<IEnumerable<MensalidadeEntity>> ObterTodosAsync()
+        }
+        
+        public async Task<IEnumerable<MensalidadeEntity>> ObterTodosAsync()
         {
             using var connection = new SqlConnection(_connectionString);
             const string sql = @"
@@ -39,10 +41,12 @@ namespace MauricioGym.Usuario.Repositories.SqlServer
         {
             using var connection = new SqlConnection(_connectionString);
             const string sql = @"
-                SELECT Id, UsuarioId, PlanoId, DataVencimento, DataPagamento, Valor, Desconto, Pago, Removido 
-                FROM Mensalidade 
-                WHERE UsuarioId = @UsuarioId AND Removido = 0
-                ORDER BY DataVencimento DESC";
+                SELECT m.Id, m.UsuarioPlanoId, m.MesReferencia, m.AnoReferencia, m.Valor, m.DataVencimento, 
+                       m.DataPagamento, m.Status, m.Ativo, m.DataCriacao, m.DataAtualizacao 
+                FROM Mensalidade m
+                INNER JOIN UsuarioPlano up ON m.UsuarioPlanoId = up.Id
+                WHERE up.UsuarioId = @UsuarioId AND m.Ativo = 1
+                ORDER BY m.DataVencimento DESC";
             
             return await connection.QueryAsync<MensalidadeEntity>(sql, new { UsuarioId = usuarioId });
         }
@@ -51,9 +55,10 @@ namespace MauricioGym.Usuario.Repositories.SqlServer
         {
             using var connection = new SqlConnection(_connectionString);
             const string sql = @"
-                SELECT Id, UsuarioId, PlanoId, DataVencimento, DataPagamento, Valor, Desconto, Pago, Removido 
+                SELECT Id, UsuarioPlanoId, MesReferencia, AnoReferencia, Valor, DataVencimento, 
+                       DataPagamento, Status, Ativo, DataCriacao, DataAtualizacao 
                 FROM Mensalidade 
-                WHERE Pago = 0 AND Removido = 0
+                WHERE Status = 'Pendente' AND Ativo = 1
                 ORDER BY DataVencimento ASC";
             
             return await connection.QueryAsync<MensalidadeEntity>(sql);
@@ -63,10 +68,11 @@ namespace MauricioGym.Usuario.Repositories.SqlServer
         {
             using var connection = new SqlConnection(_connectionString);
             const string sql = @"
-                SELECT Id, UsuarioId, PlanoId, DataVencimento, DataPagamento, Valor, Desconto, Pago, Removido 
+                SELECT Id, UsuarioPlanoId, MesReferencia, AnoReferencia, Valor, DataVencimento, 
+                       DataPagamento, Status, Ativo, DataCriacao, DataAtualizacao 
                 FROM Mensalidade 
                 WHERE DataVencimento <= DATEADD(day, @Dias, GETDATE()) 
-                  AND Pago = 0 AND Removido = 0
+                  AND Status = 'Pendente' AND Ativo = 1
                 ORDER BY DataVencimento ASC";
             
             return await connection.QueryAsync<MensalidadeEntity>(sql, new { Dias = dias });
@@ -77,11 +83,12 @@ namespace MauricioGym.Usuario.Repositories.SqlServer
             using var connection = new SqlConnection(_connectionString);
             const string sql = @"
                 SELECT COUNT(1) 
-                FROM Mensalidade 
-                WHERE UsuarioId = @UsuarioId 
-                  AND DataVencimento >= GETDATE() 
-                  AND Pago = 1 
-                  AND Removido = 0";
+                FROM Mensalidade m
+                INNER JOIN UsuarioPlano up ON m.UsuarioPlanoId = up.Id
+                WHERE up.UsuarioId = @UsuarioId 
+                  AND m.DataVencimento >= GETDATE() 
+                  AND m.Status = 'Paga' 
+                  AND m.Ativo = 1";
             
             var count = await connection.ExecuteScalarAsync<int>(sql, new { UsuarioId = usuarioId });
             return count > 0;
@@ -90,7 +97,7 @@ namespace MauricioGym.Usuario.Repositories.SqlServer
         public async Task<bool> RemoverAsync(int id)
         {
             using var connection = new SqlConnection(_connectionString);
-            const string sql = "UPDATE Mensalidade SET Removido = 1 WHERE Id = @Id";
+            const string sql = "UPDATE Mensalidade SET Ativo = 0, DataAtualizacao = GETDATE() WHERE Id = @Id";
             
             var rowsAffected = await connection.ExecuteAsync(sql, new { Id = id });
             return rowsAffected > 0;
@@ -99,7 +106,7 @@ namespace MauricioGym.Usuario.Repositories.SqlServer
         public async Task<bool> ExisteAsync(int id)
         {
             using var connection = new SqlConnection(_connectionString);
-            const string sql = "SELECT COUNT(1) FROM Mensalidade WHERE Id = @Id AND Removido = 0";
+            const string sql = "SELECT COUNT(1) FROM Mensalidade WHERE Id = @Id AND Ativo = 1";
             
             var count = await connection.ExecuteScalarAsync<int>(sql, new { Id = id });
             return count > 0;
@@ -109,8 +116,8 @@ namespace MauricioGym.Usuario.Repositories.SqlServer
         {
             using var connection = new SqlConnection(_connectionString);
             const string sql = @"
-                INSERT INTO Mensalidade (UsuarioId, PlanoId, DataVencimento, DataPagamento, Valor, Desconto, Pago, Removido)
-                VALUES (@UsuarioId, @PlanoId, @DataVencimento, @DataPagamento, @Valor, @Desconto, @Pago, @Removido);
+                INSERT INTO Mensalidade (UsuarioPlanoId, MesReferencia, AnoReferencia, Valor, DataVencimento, DataPagamento, Status, Ativo, DataCriacao)
+                VALUES (@UsuarioPlanoId, @MesReferencia, @AnoReferencia, @Valor, @DataVencimento, @DataPagamento, @Status, @Ativo, GETDATE());
                 SELECT CAST(SCOPE_IDENTITY() as int)";
             
             return await connection.QuerySingleAsync<int>(sql, mensalidade);
@@ -121,10 +128,15 @@ namespace MauricioGym.Usuario.Repositories.SqlServer
             using var connection = new SqlConnection(_connectionString);
             const string sql = @"
                 UPDATE Mensalidade 
-                SET UsuarioId = @UsuarioId, PlanoId = @PlanoId, DataVencimento = @DataVencimento, 
-                    DataPagamento = @DataPagamento, Valor = @Valor, Desconto = @Desconto, 
-                    Pago = @Pago, Removido = @Removido 
-                WHERE Id = @Id";
+                SET UsuarioPlanoId = @UsuarioPlanoId, 
+                    MesReferencia = @MesReferencia,
+                    AnoReferencia = @AnoReferencia,
+                    DataVencimento = @DataVencimento, 
+                    DataPagamento = @DataPagamento, 
+                    Valor = @Valor,
+                    Status = @Status,
+                    DataAtualizacao = GETDATE()
+                WHERE Id = @Id AND Ativo = 1";
             
             var rowsAffected = await connection.ExecuteAsync(sql, mensalidade);
             return rowsAffected > 0;
@@ -134,14 +146,14 @@ namespace MauricioGym.Usuario.Repositories.SqlServer
         {
             using var connection = new SqlConnection(_connectionString);
             const string sql = @"
-                SELECT TOP 1 Id, UsuarioId, PlanoId, DataVencimento, DataPagamento, Valor, Desconto, Pago, Removido 
-                FROM Mensalidade 
-                WHERE UsuarioId = @UsuarioId 
-                  AND DataVencimento >= GETDATE() 
-                  AND Removido = 0
-                ORDER BY DataVencimento ASC";
-            
-            return await connection.QueryFirstOrDefaultAsync<MensalidadeEntity>(sql, new { UsuarioId = usuarioId });
+                SELECT TOP 1 m.Id, m.UsuarioPlanoId, m.MesReferencia, m.AnoReferencia, m.Valor, m.DataVencimento, 
+                       m.DataPagamento, m.Status, m.Ativo, m.DataCriacao, m.DataAtualizacao 
+                FROM Mensalidade m
+                INNER JOIN UsuarioPlano up ON m.UsuarioPlanoId = up.Id
+                WHERE up.UsuarioId = @UsuarioId 
+                  AND m.DataVencimento >= GETDATE() 
+                  AND m.Ativo = 1
+                ORDER BY m.DataVencimento ASC";              return await connection.QueryFirstOrDefaultAsync<MensalidadeEntity>(sql, new { UsuarioId = usuarioId });
         }
     }
 }
