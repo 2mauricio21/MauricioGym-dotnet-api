@@ -5,6 +5,8 @@ using MauricioGym.Usuario.Entities;
 using MauricioGym.Usuario.Repositories.Interfaces;
 using MauricioGym.Usuario.Services;
 using MauricioGym.Usuario.Services.Interfaces;
+using MauricioGym.Infra.Shared.Interfaces;
+using MauricioGym.Infra.Shared;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -28,31 +30,41 @@ namespace MauricioGym.Usuario.Testes
         public async Task Deve_Criar_CheckIn_Com_Mensalidade_Em_Dia()
         {
             var checkIn = new CheckInEntity { UsuarioId = 1, DataHora = DateTime.Now };
+            var resultadoMensalidade = new ResultadoValidacao<bool>(true);
             
-            _mensalidadeServiceMock.Setup(s => s.VerificarMensalidadeEmDiaAsync(1)).ReturnsAsync(true);
+            _mensalidadeServiceMock.Setup(s => s.VerificarMensalidadeEmDiaAsync(1)).ReturnsAsync(resultadoMensalidade);
             _checkInRepositoryMock.Setup(r => r.CriarAsync(It.IsAny<CheckInEntity>())).ReturnsAsync(1);
 
-            var id = await _checkInService.CriarAsync(checkIn);
+            var resultado = await _checkInService.CriarAsync(checkIn);
 
-            Assert.Equal(1, id);
+            Assert.False(resultado.OcorreuErro);
+            Assert.Equal(1, resultado.Retorno);
         }
 
         [Fact]
         public async Task Deve_Impedir_CheckIn_Com_Mensalidade_Vencida()
         {
             var checkIn = new CheckInEntity { UsuarioId = 1, DataHora = DateTime.Now };
+            var resultadoMensalidade = new ResultadoValidacao<bool>(false);
             
-            _mensalidadeServiceMock.Setup(s => s.VerificarMensalidadeEmDiaAsync(1)).ReturnsAsync(false);            await Assert.ThrowsAsync<InvalidOperationException>(() => _checkInService.CriarAsync(checkIn));
+            _mensalidadeServiceMock.Setup(s => s.VerificarMensalidadeEmDiaAsync(1)).ReturnsAsync(resultadoMensalidade);
+
+            var resultado = await _checkInService.CriarAsync(checkIn);
+
+            Assert.True(resultado.OcorreuErro);
         }
 
         [Fact]
         public async Task Deve_Impedir_CheckIn_Sem_Mensalidade()
         {
             var checkIn = new CheckInEntity { UsuarioId = 1, DataHora = DateTime.Now };
+            var resultadoMensalidade = new ResultadoValidacao<bool>(false);
             
-            _mensalidadeServiceMock.Setup(s => s.VerificarMensalidadeEmDiaAsync(1)).ReturnsAsync(false);
+            _mensalidadeServiceMock.Setup(s => s.VerificarMensalidadeEmDiaAsync(1)).ReturnsAsync(resultadoMensalidade);
 
-            await Assert.ThrowsAsync<InvalidOperationException>(() => _checkInService.CriarAsync(checkIn));
+            var resultado = await _checkInService.CriarAsync(checkIn);
+
+            Assert.True(resultado.OcorreuErro);
         }
 
         [Fact]
@@ -61,20 +73,23 @@ namespace MauricioGym.Usuario.Testes
             var checkIns = new List<CheckInEntity> { new CheckInEntity { Id = 1, UsuarioId = 1 } };
             _checkInRepositoryMock.Setup(r => r.ObterPorUsuarioAsync(1)).ReturnsAsync(checkIns);
 
-            var result = await _checkInService.ListarPorUsuarioAsync(1);
+            var resultado = await _checkInService.ListarPorUsuarioAsync(1);
 
-            Assert.NotNull(result);
-            Assert.Single(result);
+            Assert.False(resultado.OcorreuErro);
+            Assert.NotNull(resultado.Retorno);
+            Assert.Single(resultado.Retorno);
         }
 
         [Fact]
         public async Task Deve_Verificar_Se_Pode_Fazer_CheckIn()
         {
-            _mensalidadeServiceMock.Setup(s => s.VerificarMensalidadeEmDiaAsync(1)).ReturnsAsync(true);
+            var resultadoMensalidade = new ResultadoValidacao<bool>(true);
+            _mensalidadeServiceMock.Setup(s => s.VerificarMensalidadeEmDiaAsync(1)).ReturnsAsync(resultadoMensalidade);
 
-            var result = await _checkInService.PodeRealizarCheckInAsync(1);
+            var resultado = await _checkInService.PodeRealizarCheckInAsync(1);
 
-            Assert.True(result);
+            Assert.False(resultado.OcorreuErro);
+            Assert.True(resultado.Retorno);
         }
     }
 }

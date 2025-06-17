@@ -1,21 +1,30 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using MauricioGym.Administrador.Entities;
 using MauricioGym.Administrador.Services.Interfaces;
+using MauricioGym.Infra.Controller;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MauricioGym.Administrador.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class PermissaoManipulacaoUsuarioController : ControllerBase
+    public class PermissaoManipulacaoUsuarioController : ApiController
     {
+        #region [ Campos ]
+
         private readonly IPermissaoManipulacaoUsuarioService _permissaoService;
+
+        #endregion
+
+        #region [ Construtor ]
 
         public PermissaoManipulacaoUsuarioController(IPermissaoManipulacaoUsuarioService permissaoService)
         {
             _permissaoService = permissaoService;
         }
+
+        #endregion
+
+        #region [ Endpoints ]
 
         /// <summary>
         /// Obtém uma permissão específica por ID
@@ -23,25 +32,18 @@ namespace MauricioGym.Administrador.Api.Controllers
         [HttpGet("{id:int}")]
         public async Task<ActionResult<PermissaoManipulacaoUsuarioEntity>> ObterPorId([FromRoute] int id)
         {
-            try
-            {
-                var permissao = await _permissaoService.ObterPorIdAsync(id);
-                if (permissao == null) return NotFound($"Permissão com ID {id} não encontrada");
-                return Ok(permissao);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Erro ao obter permissão: {ex.Message}");
-            }
+            var resultado = await _permissaoService.ObterPorIdAsync(id);
+            return ProcessarResultado(resultado);
         }
+
         /// <summary>
         /// Lista permissões por usuário
         /// </summary>
         [HttpGet("usuario/{usuarioId}")]
         public async Task<ActionResult<IEnumerable<PermissaoManipulacaoUsuarioEntity>>> ListarPorUsuario(int usuarioId)
         {
-            var permissoes = await _permissaoService.ListarPorUsuarioAsync(usuarioId);
-            return Ok(permissoes);
+            var resultado = await _permissaoService.ListarPorUsuarioAsync(usuarioId);
+            return ProcessarResultado(resultado);
         }
 
         /// <summary>
@@ -50,8 +52,8 @@ namespace MauricioGym.Administrador.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<int>> Criar([FromBody] PermissaoManipulacaoUsuarioEntity permissao)
         {
-            var id = await _permissaoService.CriarAsync(permissao);
-            return CreatedAtAction(nameof(ObterPorId), new { id }, id);
+            var resultado = await _permissaoService.CriarAsync(permissao);
+            return ProcessarResultado(resultado);
         }
 
         /// <summary>
@@ -60,21 +62,23 @@ namespace MauricioGym.Administrador.Api.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult> Atualizar(int id, [FromBody] PermissaoManipulacaoUsuarioEntity permissao)
         {
-            if (id != permissao.Id) return BadRequest();
-            var atualizado = await _permissaoService.AtualizarAsync(permissao);
-            if (!atualizado) return NotFound();
-            return NoContent();
+            if (id != permissao.Id) 
+                return BadRequest("O ID da URL deve corresponder ao ID da permissão.");
+
+            var resultado = await _permissaoService.AtualizarAsync(permissao);
+            return ProcessarResultado(resultado);
         }
 
         /// <summary>
-        /// Remove uma permissão (remoção lógica)
+        /// Remove uma permissão
         /// </summary>
         [HttpDelete("{id}")]
         public async Task<ActionResult> Remover(int id)
         {
-            var removido = await _permissaoService.RemoverAsync(id);
-            if (!removido) return NotFound();
-            return NoContent();
+            var resultado = await _permissaoService.RemoverAsync(id);
+            return ProcessarResultado(resultado);
         }
+
+        #endregion
     }
 }

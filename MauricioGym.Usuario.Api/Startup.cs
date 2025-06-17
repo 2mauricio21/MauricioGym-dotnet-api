@@ -2,6 +2,7 @@ using MauricioGym.Usuario.Services;
 using MauricioGym.Usuario.Services.Interfaces;
 using MauricioGym.Usuario.Repositories.SqlServer;
 using MauricioGym.Usuario.Repositories.Interfaces;
+using MauricioGym.Infra;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -32,7 +33,12 @@ namespace MauricioGym.Usuario.Api
                     Version = "v1",
                     Description = "API para usuários do MauricioGym (Check-in e Mensalidades)"
                 });
-            });            // Connection String
+            });
+
+            // Configurar a infraestrutura
+            services.ConfigureServicesInfra(Configuration);
+
+            // Connection String
             var connectionString = Configuration.GetConnectionString("DefaultConnection") 
                 ?? "Server=(localdb)\\mssqllocaldb;Database=MauricioGymDB;Trusted_Connection=true;TrustServerCertificate=true;";
 

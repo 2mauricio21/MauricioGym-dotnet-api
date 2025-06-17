@@ -1,15 +1,25 @@
 using MauricioGym.Usuario.Entities;
 using MauricioGym.Usuario.Repositories.Interfaces;
 using MauricioGym.Usuario.Services.Interfaces;
+using MauricioGym.Usuario.Services.Validators;
+using MauricioGym.Infra.Services;
+using MauricioGym.Infra.Shared;
+using MauricioGym.Infra.Shared.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace MauricioGym.Usuario.Services
 {
-    public class UsuarioService : IUsuarioService
+    public class UsuarioService : ServiceBase<UsuarioValidator>, IUsuarioService
     {
+        #region [ Campos ]
+
         private readonly IUsuarioSqlServerRepository _usuarioRepository;
         private readonly IMensalidadeService _mensalidadeService;
         private readonly ILogger<UsuarioService> _logger;
+
+        #endregion
+
+        #region [ Construtor ]
 
         public UsuarioService(
             IUsuarioSqlServerRepository usuarioRepository,
@@ -21,160 +31,199 @@ namespace MauricioGym.Usuario.Services
             _logger = logger;
         }
 
-        public async Task<IEnumerable<UsuarioEntity>> ObterTodosAsync()
+        #endregion
+
+        #region [ Métodos Públicos ]
+
+        public async Task<IResultadoValidacao<IEnumerable<UsuarioEntity>>> ObterTodosAsync()
         {
             try
             {
-                return await _usuarioRepository.ObterTodosAsync();
+                var usuarios = await _usuarioRepository.ObterTodosAsync();
+                return new ResultadoValidacao<IEnumerable<UsuarioEntity>>(usuarios);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao obter todos os usuários");
-                throw;
+                return new ResultadoValidacao<IEnumerable<UsuarioEntity>>(ex, "Erro ao obter todos os usuários");
             }
         }
 
-        public async Task<UsuarioEntity?> ObterPorIdAsync(int id)
+        public async Task<IResultadoValidacao<UsuarioEntity?>> ObterPorIdAsync(int id)
         {
             try
             {
-                if (id <= 0)
-                    return null;
+                var validacao = Validator.ObterUsuarioPorId(id);
+                if (validacao.OcorreuErro)
+                    return new ResultadoValidacao<UsuarioEntity?>(validacao);
 
-                return await _usuarioRepository.ObterPorIdAsync(id);
+                var usuario = await _usuarioRepository.ObterPorIdAsync(id);
+                return new ResultadoValidacao<UsuarioEntity?>(usuario);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao obter usuário por ID: {Id}", id);
-                throw;
+                return new ResultadoValidacao<UsuarioEntity?>(ex, $"Erro ao obter usuário com ID {id}");
             }
         }
 
-        public async Task<UsuarioEntity?> ObterPorEmailAsync(string email)
+        public async Task<IResultadoValidacao<UsuarioEntity?>> ObterPorEmailAsync(string email)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(email))
-                    return null;
+                var validacao = Validator.ObterUsuarioPorEmail(email);
+                if (validacao.OcorreuErro)
+                    return new ResultadoValidacao<UsuarioEntity?>(validacao);
 
-                return await _usuarioRepository.ObterPorEmailAsync(email);
+                var usuario = await _usuarioRepository.ObterPorEmailAsync(email);
+                return new ResultadoValidacao<UsuarioEntity?>(usuario);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao obter usuário por email: {Email}", email);
-                throw;
+                return new ResultadoValidacao<UsuarioEntity?>(ex, $"Erro ao obter usuário com email {email}");
             }
         }
 
-        public async Task<int> CriarAsync(UsuarioEntity usuario)
+        public async Task<IResultadoValidacao<int>> CriarAsync(UsuarioEntity usuario)
         {
             try
             {
-                if (usuario == null)
-                    throw new ArgumentNullException(nameof(usuario));
+                var validacao = Validator.CriarUsuario(usuario);
+                if (validacao.OcorreuErro)
+                    return new ResultadoValidacao<int>(validacao);
 
-                if (string.IsNullOrWhiteSpace(usuario.Nome))
-                    throw new ArgumentException("Nome é obrigatório", nameof(usuario));
+                // Verificar se o email já existe
+                var usuarioExistente = await _usuarioRepository.ExisteEmailAsync(usuario.Email);
+                if (usuarioExistente)
+                    return new ResultadoValidacao<int>("Já existe um usuário com este email.");
 
-                if (string.IsNullOrWhiteSpace(usuario.Email))
-                    throw new ArgumentException("Email é obrigatório", nameof(usuario));                if (await _usuarioRepository.ExisteEmailAsync(usuario.Email))
-                    throw new InvalidOperationException("Já existe um usuário com este email");
-
+                // Definir propriedades padrão
                 usuario.DataCriacao = DateTime.Now;
                 usuario.Ativo = true;
 
-                return await _usuarioRepository.CriarAsync(usuario);
+                var id = await _usuarioRepository.CriarAsync(usuario);
+                return new ResultadoValidacao<int>(id);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao criar usuário: {Nome}", usuario?.Nome);
-                throw;
+                _logger.LogError(ex, "Erro ao criar usuário: {Email}", usuario?.Email);
+                return new ResultadoValidacao<int>(ex, "Erro ao criar usuário");
             }
         }
 
-        public async Task<bool> AtualizarAsync(UsuarioEntity usuario)
+        public async Task<IResultadoValidacao<bool>> AtualizarAsync(UsuarioEntity usuario)
         {
             try
             {
-                if (usuario == null)
-                    throw new ArgumentNullException(nameof(usuario));
+                var validacao = Validator.AtualizarUsuario(usuario);
+                if (validacao.OcorreuErro)
+                    return new ResultadoValidacao<bool>(validacao);
 
-                if (usuario.Id <= 0)
-                    throw new ArgumentException("ID inválido", nameof(usuario));
+                // Verificar se o usuário existe
+                var usuarioExiste = await _usuarioRepository.ExisteAsync(usuario.Id);
+                if (!usuarioExiste)
+                    return new ResultadoValidacao<bool>("Usuário não encontrado.");
 
-                if (string.IsNullOrWhiteSpace(usuario.Nome))
-                    throw new ArgumentException("Nome é obrigatório", nameof(usuario));
+                // Verificar se o email já existe para outro usuário
+                var emailExiste = await _usuarioRepository.ExisteEmailAsync(usuario.Email, usuario.Id);
+                if (emailExiste)
+                    return new ResultadoValidacao<bool>("Já existe outro usuário com este email.");
 
-                if (string.IsNullOrWhiteSpace(usuario.Email))
-                    throw new ArgumentException("Email é obrigatório", nameof(usuario));
-
-                if (!await _usuarioRepository.ExisteAsync(usuario.Id))
-                    throw new InvalidOperationException("Usuário não encontrado");
-
-                if (await _usuarioRepository.ExisteEmailAsync(usuario.Email, usuario.Id))
-                    throw new InvalidOperationException("Já existe outro usuário com este email");
-
-                return await _usuarioRepository.AtualizarAsync(usuario);
+                var sucesso = await _usuarioRepository.AtualizarAsync(usuario);
+                return new ResultadoValidacao<bool>(sucesso);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao atualizar usuário: {Id}", usuario?.Id);
-                throw;
+                return new ResultadoValidacao<bool>(ex, "Erro ao atualizar usuário");
             }
         }
 
-        public async Task<bool> RemoverAsync(int id)
+        public async Task<IResultadoValidacao<bool>> RemoverAsync(int id)
         {
             try
             {
-                if (id <= 0)
-                    throw new ArgumentException("ID inválido", nameof(id));
+                var validacao = Validator.RemoverUsuario(id);
+                if (validacao.OcorreuErro)
+                    return new ResultadoValidacao<bool>(validacao);
 
-                if (!await _usuarioRepository.ExisteAsync(id))
-                    throw new InvalidOperationException("Usuário não encontrado");
+                // Verificar se o usuário existe
+                var usuarioExiste = await _usuarioRepository.ExisteAsync(id);
+                if (!usuarioExiste)
+                    return new ResultadoValidacao<bool>("Usuário não encontrado.");
 
-                return await _usuarioRepository.RemoverAsync(id);
+                var sucesso = await _usuarioRepository.RemoverAsync(id);
+                return new ResultadoValidacao<bool>(sucesso);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao remover usuário: {Id}", id);
-                throw;
+                return new ResultadoValidacao<bool>(ex, "Erro ao remover usuário");
             }
         }
 
-        public async Task<bool> ExisteAsync(int id)
+        public async Task<IResultadoValidacao<bool>> ExisteAsync(int id)
         {
             try
             {
-                if (id <= 0)
-                    return false;
+                var validacao = Validator.ObterUsuarioPorId(id);
+                if (validacao.OcorreuErro)
+                    return new ResultadoValidacao<bool>(validacao);
 
-                return await _usuarioRepository.ExisteAsync(id);
+                var existe = await _usuarioRepository.ExisteAsync(id);
+                return new ResultadoValidacao<bool>(existe);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao verificar existência do usuário: {Id}", id);
-                throw;
+                return new ResultadoValidacao<bool>(ex, "Erro ao verificar existência do usuário");
             }
         }
 
-        public async Task<bool> PodeFazerCheckInAsync(int usuarioId)
+        public async Task<IResultadoValidacao<bool>> ExisteEmailAsync(string email, int? excludeId = null)
         {
             try
             {
-                if (usuarioId <= 0)
-                    return false;
+                var validacao = Validator.ObterUsuarioPorEmail(email);
+                if (validacao.OcorreuErro)
+                    return new ResultadoValidacao<bool>(validacao);
 
-                if (!await ExisteAsync(usuarioId))
-                    return false;
+                var existe = await _usuarioRepository.ExisteEmailAsync(email, excludeId);
+                return new ResultadoValidacao<bool>(existe);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao verificar existência do email: {Email}", email);
+                return new ResultadoValidacao<bool>(ex, "Erro ao verificar existência do email");
+            }
+        }
 
-                return await _mensalidadeService.EstaEmDiaAsync(usuarioId);
+        public async Task<IResultadoValidacao<bool>> PodeFazerCheckInAsync(int usuarioId)
+        {
+            try
+            {
+                var validacao = Validator.ObterUsuarioPorId(usuarioId);
+                if (validacao.OcorreuErro)
+                    return new ResultadoValidacao<bool>(validacao);
+
+                // Verificar se o usuário existe
+                var usuarioExiste = await _usuarioRepository.ExisteAsync(usuarioId);
+                if (!usuarioExiste)
+                    return new ResultadoValidacao<bool>("Usuário não encontrado.");                // Verificar se está em dia com a mensalidade
+                var resultadoMensalidade = await _mensalidadeService.EstaEmDiaAsync(usuarioId);
+                if (resultadoMensalidade.OcorreuErro)
+                    return new ResultadoValidacao<bool>(resultadoMensalidade.Erro);
+
+                return new ResultadoValidacao<bool>(resultadoMensalidade.Retorno);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao verificar se usuário pode fazer check-in: {UsuarioId}", usuarioId);
-                throw;
+                return new ResultadoValidacao<bool>(ex, "Erro ao verificar se usuário pode fazer check-in");
             }
         }
+
+        #endregion
     }
 }

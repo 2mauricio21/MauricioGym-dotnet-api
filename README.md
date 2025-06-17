@@ -1,10 +1,42 @@
-# 🏋️‍♂️ MauricioGym - Sistema de Academia com Domínios Separados
+# 🏋️‍♂️ MauricioGym - Sistema de Academia com Infraestrutura Reutilizável
 
-Sistema de gerenciamento de academia desenvolvido em .NET 8, com **arquitetura limpa de domínios separados** e testes unitários automatizados.
+Sistema de gerenciamento de academia desenvolvido em .NET 8, com **arquitetura limpa de domínios separados**, **infraestrutura modular reutilizável** e testes unitários automatizados.
 
 ## 📚 Visão Geral
 
-O MauricioGym é um sistema completo para academias que gerencia usuários, planos, check-ins, mensalidades e controle financeiro. Foi desenvolvido seguindo princípios de **Clean Architecture** e **SOLID**, com uma clara separação de responsabilidades em domínios independentes.
+O MauricioGym é um sistema completo para academias que gerencia usuários, planos, check-ins, mensalidades e controle financeiro. Foi desenvolvido seguindo princípios de **Clean Architecture** e **SOLID**, com uma clara separação de responsabilidades em domínios independentes e uma camada de infraestrutura comum.
+
+## 🛠️ Infraestrutura (MauricioGym.Infra)
+
+A solução conta com uma **camada de infraestrutura reutilizável** que fornece componentes comuns para todos os módulos:
+
+### ✨ Funcionalidades da Infraestrutura
+
+- **Configuração Centralizada**: `AppConfiguration` e `AppConfig` para configurações globais
+- **Transações SQL**: `SqlServerDbContext` com suporte a transações nomeadas
+- **Controlador Base**: `ApiController` com extração automática de Claims JWT
+- **Validação Padronizada**: `IResultadoValidacao` para retornos consistentes
+- **Auditoria Automática**: `EntityBase` com campos de auditoria
+- **Dependency Injection**: `IServiceCollectionExtension` para configuração automática
+- **Repositórios Base**: Padrões para acesso a dados com transações
+
+### 📁 Estrutura da Infraestrutura
+
+```
+MauricioGym.Infra/
+├── Config/             # Configurações da aplicação
+├── Controller/         # Controlador base para APIs
+├── Database/           # Contexto e configuração do banco
+├── Entities/           # Entidades base e auditoria
+├── Enums/             # Enumeradores do sistema
+├── Interfaces/        # Contratos da infraestrutura
+├── Repositories/      # Repositórios base
+├── Services/          # Serviços de infraestrutura
+├── Shared/            # Componentes compartilhados (IResultadoValidacao)
+├── README.md          # Documentação da infraestrutura
+├── EXAMPLES.md        # Exemplos práticos de uso
+└── MIGRATION_GUIDE.md # Guia de migração
+```
 
 ## 🏗️ Arquitetura de Domínios
 
@@ -350,3 +382,81 @@ Repositório: https://github.com/2mauricio21/MauricioGym-dotnet-api.git
 ---
 
 > Projeto 100% local, sem dependências de nuvem, pronto para desenvolvimento e estudo.
+
+## 📊 Padrões Implementados na Infraestrutura
+
+### Validação e Retorno Padronizado
+
+Todos os serviços utilizam `IResultadoValidacao<T>` para retornos consistentes:
+
+```csharp
+public async Task<IResultadoValidacao<UsuarioEntity>> CriarUsuario(UsuarioEntity usuario)
+{
+    var validator = new ValidatorService();
+    validator.When(string.IsNullOrEmpty(usuario.Nome), "Nome é obrigatório");
+    
+    if (!validator.IsValid)
+        return validator.ToResultadoValidacao<UsuarioEntity>();
+    
+    // Lógica de negócio...
+    return CriarResultadoSucesso(usuario, "Usuário criado com sucesso");
+}
+```
+
+### Auditoria Automática
+
+Todas as entidades herdam de `EntityBase` com campos de auditoria:
+
+```csharp
+public class UsuarioEntity : EntityBase
+{
+    public string Nome { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    // Campos herdados: Id, DataCriacao, DataAlteracao, UsuarioCriacao, UsuarioAlteracao, Ativo
+}
+```
+
+### Controladores com Claims Automáticas
+
+Controladores herdam de `ApiController` com acesso automático aos dados do usuário:
+
+```csharp
+[Route("api/[controller]")]
+public class UsuarioController : ApiController
+{
+    [HttpGet("perfil")]
+    public IActionResult MeuPerfil()
+    {
+        return Ok(new { 
+            Id = IdUsuario, 
+            Nome = NomeUsuario, 
+            Academia = IdAcademia 
+        });
+    }
+}
+```
+
+### Transações Controladas
+
+Serviços herdam de `ServiceBase` com controle automático de transações:
+
+```csharp
+public class UsuarioService : ServiceBase
+{
+    public async Task<IResultadoValidacao<bool>> ProcessarOperacao()
+    {
+        await Transaction.BeginTransactionAsync();
+        try
+        {
+            // Operações...
+            await Transaction.CommitAsync();
+            return CriarResultadoSucesso(true);
+        }
+        catch
+        {
+            await Transaction.RollbackAsync();
+            throw;
+        }
+    }
+}
+```

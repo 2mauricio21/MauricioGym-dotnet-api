@@ -1,15 +1,14 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using MauricioGym.Administrador.Entities;
+using MauricioGym.Infra.Shared.Interfaces;
 
 namespace MauricioGym.Administrador.Services.Interfaces
 {
     public interface IPlanoService
     {
-        Task<PlanoEntity> ObterPorIdAsync(int id);
-        Task<IEnumerable<PlanoEntity>> ListarAsync();
-        Task<int> CriarAsync(PlanoEntity plano);
-        Task<bool> AtualizarAsync(PlanoEntity plano);
-        Task<bool> RemoverLogicamenteAsync(int id);
+        Task<IResultadoValidacao<PlanoEntity?>> ObterPorIdAsync(int id);
+        Task<IResultadoValidacao<IEnumerable<PlanoEntity>>> ListarAsync();
+        Task<IResultadoValidacao<int>> CriarAsync(PlanoEntity plano);
+        Task<IResultadoValidacao<bool>> AtualizarAsync(PlanoEntity plano);
+        Task<IResultadoValidacao<bool>> RemoverLogicamenteAsync(int id);
     }
 }

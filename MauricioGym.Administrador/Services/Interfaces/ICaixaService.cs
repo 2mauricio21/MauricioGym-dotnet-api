@@ -1,15 +1,14 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using MauricioGym.Administrador.Entities;
+using MauricioGym.Infra.Shared.Interfaces;
 
 namespace MauricioGym.Administrador.Services.Interfaces
 {
     public interface ICaixaService
     {
-        Task<CaixaEntity> ObterPorIdAsync(int id);
-        Task<IEnumerable<CaixaEntity>> ListarAsync();
-        Task<int> CriarAsync(CaixaEntity caixa);
-        Task<bool> AtualizarAsync(CaixaEntity caixa);
-        Task<bool> RemoverAsync(int id);
+        Task<IResultadoValidacao<CaixaEntity>> ObterPorIdAsync(int id);
+        Task<IResultadoValidacao<IEnumerable<CaixaEntity>>> ListarAsync();
+        Task<IResultadoValidacao<int>> CriarAsync(CaixaEntity caixa);
+        Task<IResultadoValidacao<bool>> AtualizarAsync(CaixaEntity caixa);
+        Task<IResultadoValidacao<bool>> RemoverAsync(int id);
     }
 }

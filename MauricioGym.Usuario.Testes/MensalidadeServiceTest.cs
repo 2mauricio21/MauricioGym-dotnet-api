@@ -21,17 +21,16 @@ namespace MauricioGym.Usuario.Testes
             _mensalidadeRepositoryMock = new Mock<IMensalidadeSqlServerRepository>();
             _loggerMock = new Mock<ILogger<MensalidadeService>>();
             _mensalidadeService = new MensalidadeService(_mensalidadeRepositoryMock.Object, _loggerMock.Object);
-        }
-
-        [Fact]
+        }        [Fact]
         public async Task Deve_Registrar_Pagamento_Mensalidade_Com_Sucesso()
         {
             _mensalidadeRepositoryMock.Setup(r => r.CriarAsync(It.IsAny<MensalidadeEntity>())).ReturnsAsync(1);
 
-            var id = await _mensalidadeService.RegistrarPagamentoMensalidadeAsync(1, 1, 3, 100, DateTime.Now);
+            var resultado = await _mensalidadeService.RegistrarPagamentoMensalidadeAsync(1, 1, 3, 100, DateTime.Now);
 
-            Assert.Equal(1, id);
-        }        [Fact]
+            Assert.False(resultado.OcorreuErro);
+            Assert.Equal(1, resultado.Retorno);
+        }[Fact]
         public void Deve_Calcular_Desconto_Trimestral()
         {
             var valorBase = 100m;
@@ -78,9 +77,10 @@ namespace MauricioGym.Usuario.Testes
         {
             _mensalidadeRepositoryMock.Setup(r => r.CriarAsync(It.IsAny<MensalidadeEntity>())).ReturnsAsync(1);
 
-            var id = await _mensalidadeService.RegistrarPagamentoMensalidadeAsync(1, 1, 3, 100m, DateTime.Now);
+            var resultado = await _mensalidadeService.RegistrarPagamentoMensalidadeAsync(1, 1, 3, 100m, DateTime.Now);
 
-            Assert.Equal(1, id);
+            Assert.False(resultado.OcorreuErro);
+            Assert.Equal(1, resultado.Retorno);
             _mensalidadeRepositoryMock.Verify(r => r.CriarAsync(It.Is<MensalidadeEntity>(m => m.Valor == 285m)), Times.Once);
         }
 
@@ -89,9 +89,10 @@ namespace MauricioGym.Usuario.Testes
         {
             _mensalidadeRepositoryMock.Setup(r => r.EstaEmDiaAsync(1)).ReturnsAsync(true);
 
-            var result = await _mensalidadeService.VerificarMensalidadeEmDiaAsync(1);
+            var resultado = await _mensalidadeService.VerificarMensalidadeEmDiaAsync(1);
 
-            Assert.True(result);
+            Assert.False(resultado.OcorreuErro);
+            Assert.True(resultado.Retorno);
         }
 
         [Fact]
@@ -99,7 +100,10 @@ namespace MauricioGym.Usuario.Testes
         {
             _mensalidadeRepositoryMock.Setup(r => r.EstaEmDiaAsync(1)).ReturnsAsync(false);
 
-            var result = await _mensalidadeService.VerificarMensalidadeEmDiaAsync(1);            Assert.False(result);
+            var resultado = await _mensalidadeService.VerificarMensalidadeEmDiaAsync(1);
+
+            Assert.False(resultado.OcorreuErro);
+            Assert.False(resultado.Retorno);
         }
     }
 }

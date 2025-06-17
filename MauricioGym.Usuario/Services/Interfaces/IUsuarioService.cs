@@ -1,16 +1,18 @@
+using MauricioGym.Infra.Shared.Interfaces;
 using MauricioGym.Usuario.Entities;
 
 namespace MauricioGym.Usuario.Services.Interfaces
 {
     public interface IUsuarioService
     {
-        Task<IEnumerable<UsuarioEntity>> ObterTodosAsync();
-        Task<UsuarioEntity?> ObterPorIdAsync(int id);
-        Task<UsuarioEntity?> ObterPorEmailAsync(string email);
-        Task<int> CriarAsync(UsuarioEntity usuario);
-        Task<bool> AtualizarAsync(UsuarioEntity usuario);
-        Task<bool> RemoverAsync(int id);
-        Task<bool> ExisteAsync(int id);
-        Task<bool> PodeFazerCheckInAsync(int usuarioId);
+        Task<IResultadoValidacao<IEnumerable<UsuarioEntity>>> ObterTodosAsync();
+        Task<IResultadoValidacao<UsuarioEntity?>> ObterPorIdAsync(int id);
+        Task<IResultadoValidacao<UsuarioEntity?>> ObterPorEmailAsync(string email);
+        Task<IResultadoValidacao<int>> CriarAsync(UsuarioEntity usuario);
+        Task<IResultadoValidacao<bool>> AtualizarAsync(UsuarioEntity usuario);
+        Task<IResultadoValidacao<bool>> RemoverAsync(int id);
+        Task<IResultadoValidacao<bool>> ExisteAsync(int id);
+        Task<IResultadoValidacao<bool>> ExisteEmailAsync(string email, int? excludeId = null);
+        Task<IResultadoValidacao<bool>> PodeFazerCheckInAsync(int usuarioId);
     }
 }
