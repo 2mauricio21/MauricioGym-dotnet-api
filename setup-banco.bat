@@ -1,8 +1,8 @@
 @echo off
-echo ======================================    echo Dados de exemplo disponiveis:
-    echo  - 2 Administradores
-    echo  - 4 Planos (Mensal, Trimestral, Semestral, Anual)
-    echo  - 5 Usuarios======================================
+chcp 65001 > nul
+setlocal enabledelayedexpansion
+
+echo ================================================================================
 echo                  MauricioGym - Setup Automatico do Banco de Dados
 echo ================================================================================
 echo.
@@ -22,7 +22,8 @@ echo Verificando SQL Server LocalDB...
 echo.
 
 sqlcmd -S "(localdb)\mssqllocaldb" -Q "SELECT @@VERSION" > nul 2>&1
-if %ERRORLEVEL% NEQ 0 (
+
+if errorlevel 1 (
     echo [ERRO] Nao foi possivel conectar ao SQL Server LocalDB.
     echo.
     echo Tente o seguinte:
@@ -42,8 +43,11 @@ echo.
 echo Executando setup do banco de dados...
 echo.
 
-sqlcmd -S "(localdb)\mssqllocaldb" -i "sql\setup_completo.sql" -b
-if %ERRORLEVEL% EQU 0 (
+REM Executa o script SQL
+sqlcmd -S "(localdb)\mssqllocaldb" -i "sql\setup_completo.sql" > sqloutput.txt 2>&1
+set SQL_RESULT=%ERRORLEVEL%
+
+if %SQL_RESULT% EQU 0 (
     echo.
     echo ================================================================================
     echo                               SUCESSO!
@@ -63,6 +67,12 @@ if %ERRORLEVEL% EQU 0 (
     echo  - 3 CheckIns
     echo  - 5 Mensalidades
     echo ================================================================================
+    
+    del sqloutput.txt > nul 2>&1
+    echo.
+    echo Pressione qualquer tecla para sair...
+    pause > nul
+    exit /b 0
 ) else (
     echo.
     echo ================================================================================
@@ -80,10 +90,8 @@ if %ERRORLEVEL% EQU 0 (
     echo  2. Reinicie o LocalDB: sqllocaldb stop mssqllocaldb ^& sqllocaldb start mssqllocaldb
     echo  3. Execute este script novamente
     echo ================================================================================
+    
+    del sqloutput.txt > nul 2>&1
     pause
     exit /b 1
 )
-
-echo.
-echo Pressione qualquer tecla para sair...
-pause > nul
