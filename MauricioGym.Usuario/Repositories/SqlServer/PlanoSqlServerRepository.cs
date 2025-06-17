@@ -1,6 +1,7 @@
 using Dapper;
 using MauricioGym.Usuario.Entities;
 using MauricioGym.Usuario.Repositories.Interfaces;
+using MauricioGym.Usuario.Repositories.SqlServer.Queries;
 using System.Data.SqlClient;
 
 namespace MauricioGym.Usuario.Repositories.SqlServer
@@ -15,32 +16,19 @@ namespace MauricioGym.Usuario.Repositories.SqlServer
         }        public async Task<IEnumerable<PlanoEntity>> ObterTodosAsync()
         {
             using var connection = new SqlConnection(_connectionString);
-            var query = @"
-                SELECT Id, Nome, Valor, DuracaoMeses, Ativo, DataCriacao, DataAtualizacao
-                FROM Plano 
-                WHERE Ativo = 1 
-                ORDER BY Nome";
-            
-            return await connection.QueryAsync<PlanoEntity>(query);
+            return await connection.QueryAsync<PlanoEntity>(PlanoSqlServerQuery.ObterTodos);
         }
 
         public async Task<PlanoEntity?> ObterPorIdAsync(int id)
         {
             using var connection = new SqlConnection(_connectionString);
-            var query = @"
-                SELECT Id, Nome, Valor, DuracaoMeses, Ativo, DataCriacao, DataAtualizacao
-                FROM Plano 
-                WHERE Id = @Id AND Ativo = 1";
-            
-            return await connection.QueryFirstOrDefaultAsync<PlanoEntity>(query, new { Id = id });
+            return await connection.QueryFirstOrDefaultAsync<PlanoEntity>(PlanoSqlServerQuery.ObterPorId, new { Id = id });
         }
 
         public async Task<bool> ExisteAsync(int id)
         {
             using var connection = new SqlConnection(_connectionString);
-            var query = "SELECT COUNT(1) FROM Plano WHERE Id = @Id AND Ativo = 1";
-            
-            var count = await connection.ExecuteScalarAsync<int>(query, new { Id = id });
+            var count = await connection.ExecuteScalarAsync<int>(PlanoSqlServerQuery.Existe, new { Id = id });
             return count > 0;
         }
     }
