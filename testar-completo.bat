@@ -27,17 +27,17 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-dotnet --version | findstr /r "8\.[0-9]*\.[0-9]*" >nul
+for /f "tokens=*" %%a in ('dotnet --version') do set DOTNET_VERSION=%%a
+echo Versao do .NET detectada: %DOTNET_VERSION%
+
+echo %DOTNET_VERSION% | findstr /b /c:"8." >nul
 if %errorlevel% neq 0 (
     echo [ATENCAO] A versao do .NET SDK pode nao ser compativel com este projeto.
     echo Recomendamos o .NET 8.0 ou superior.
     echo.
-    echo Sua versao atual:
-    dotnet --version
-    echo.
-    echo Deseja continuar mesmo assim? (S/N)
-    set /p continuar=
-    if /i "!continuar!" neq "S" exit /b 1
+    echo Deseja continuar mesmo assim?
+    choice /c SN /m "Digite S para continuar ou N para sair"
+    if errorlevel 2 exit /b 1
 ) else (
     echo [OK] .NET SDK 8.x detectado.
 )
