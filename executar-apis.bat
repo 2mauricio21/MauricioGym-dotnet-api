@@ -25,9 +25,9 @@ if %errorlevel% neq 0 (
     echo Sua versao atual:
     dotnet --version
     echo.
-    echo Deseja continuar mesmo assim? (S/N)
-    set /p continuar=
-    if /i "!continuar!" neq "S" exit /b 1
+    echo Deseja continuar mesmo assim?
+    choice /c SN /m "Digite S para continuar ou N para sair"
+    if errorlevel 2 exit /b 1
 ) else (
     echo [OK] .NET SDK 8.x detectado.
 )
@@ -93,21 +93,12 @@ echo  [B] = Ambas as APIs (em janelas separadas)
 echo  [N] = Nenhuma (sair)
 echo.
 
-set /p escolha="Sua escolha (A/U/B/N): "
+choice /c AUBN /m "Sua escolha"
 
-if /i "%escolha%" == "A" (
+if errorlevel 4 (
     echo.
-    echo Iniciando API Administrador...
-    start "API Administrador" cmd /c "dotnet run --project Administrador.Api\MauricioGym.Administrador.Api.csproj & pause"
-    echo [OK] API Administrador iniciada! Acesse: http://localhost:5001/swagger
-    
-) else if /i "%escolha%" == "U" (
-    echo.
-    echo Iniciando API Usuario...
-    start "API Usuario" cmd /c "dotnet run --project Usuario.Api\MauricioGym.Usuario.Api.csproj & pause"
-    echo [OK] API Usuario iniciada! Acesse: http://localhost:5002/swagger
-    
-) else if /i "%escolha%" == "B" (
+    echo Nenhuma API iniciada. Execute este script novamente quando desejar iniciar as APIs.
+) else if errorlevel 3 (
     echo.
     echo Iniciando ambas as APIs em janelas separadas...
     start "API Administrador" cmd /c "dotnet run --project Administrador.Api\MauricioGym.Administrador.Api.csproj & pause"
@@ -115,10 +106,16 @@ if /i "%escolha%" == "A" (
     echo [OK] Ambas as APIs foram iniciadas!
     echo  - API Administrador: http://localhost:5001/swagger
     echo  - API Usuario: http://localhost:5002/swagger
-    
+) else if errorlevel 2 (
+    echo.
+    echo Iniciando API Usuario...
+    start "API Usuario" cmd /c "dotnet run --project Usuario.Api\MauricioGym.Usuario.Api.csproj & pause"
+    echo [OK] API Usuario iniciada! Acesse: http://localhost:5002/swagger
 ) else (
     echo.
-    echo Nenhuma API iniciada. Execute este script novamente quando desejar iniciar as APIs.
+    echo Iniciando API Administrador...
+    start "API Administrador" cmd /c "dotnet run --project Administrador.Api\MauricioGym.Administrador.Api.csproj & pause"
+    echo [OK] API Administrador iniciada! Acesse: http://localhost:5001/swagger
 )
 
 echo.
