@@ -1,3 +1,7 @@
+-- Usar o banco de dados MauricioGym
+USE MauricioGymDB;
+GO
+
 -- Tabela para Check-in de alunos
 CREATE TABLE CheckIn (
     Id INT IDENTITY(1,1) PRIMARY KEY,

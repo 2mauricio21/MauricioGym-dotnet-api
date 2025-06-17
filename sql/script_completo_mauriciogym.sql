@@ -1,5 +1,16 @@
 -- Script completo e profissional para MauricioGym
 
+-- Criar o banco de dados se não existir
+IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = N'MauricioGymDB')
+BEGIN
+    CREATE DATABASE MauricioGymDB;
+END
+GO
+
+-- Usar o banco de dados MauricioGym
+USE MauricioGymDB;
+GO
+
 -- Tabelas principais
 CREATE TABLE Pessoa (
     Id INT IDENTITY(1,1) PRIMARY KEY,

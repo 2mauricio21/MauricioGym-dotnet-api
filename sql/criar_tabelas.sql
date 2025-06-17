@@ -1,4 +1,15 @@
--- Script de criação das tabelas para MauricioGym
+-- Script de criação do banco de dados e tabelas para MauricioGym
+
+-- Criar o banco de dados se não existir
+IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'MauricioGymDB')
+BEGIN
+    CREATE DATABASE MauricioGymDB;
+END
+GO
+
+-- Usar o banco de dados criado
+USE MauricioGymDB;
+GO
 
 CREATE TABLE Pessoa (
     Id INT IDENTITY(1,1) PRIMARY KEY,
