@@ -213,6 +213,18 @@ testar-completo.bat
 - Acesse: [http://localhost:5001/swagger](http://localhost:5001/swagger) (não https)
 - Certifique-se de que está rodando em ambiente de Development
 
+### Erro "Porta já em uso"?
+
+Se você receber erros como `Failed to bind to address http://127.0.0.1:5002: address already in use` ou `System.Net.Sockets.SocketException (10048)`:
+
+```bash
+# Execute o script que libera as portas 5001 e 5002
+liberar-portas.bat
+
+# Depois tente executar as APIs novamente
+executar-apis.bat
+```
+
 ## 📝 Documentação das APIs
 
 Cada API possui documentação Swagger completa que pode ser acessada pelos seguintes endereços:
