@@ -71,8 +71,14 @@ Responsável pelas ações dos usuários finais:
 ### 1. Setup do Banco de Dados
 
 ```bash
-# Execute o script que faz tudo automaticamente
+# Opção 1: Execute o script diretamente do Windows Explorer
 setup-banco.bat
+
+# Opção 2: Execute via terminal do Windows
+.\setup-banco.bat
+
+# Opção 3: Execute via PowerShell ou terminal VSCode
+start setup-banco.bat
 ```
 
 Este script cria o banco `MauricioGymDB` com todas as tabelas e dados de exemplo para testes.
@@ -80,8 +86,14 @@ Este script cria o banco `MauricioGymDB` com todas as tabelas e dados de exemplo
 ### 2. Build e Testes
 
 ```bash
-# Execute o script que testa tudo automaticamente
+# Opção 1: Execute o script diretamente do Windows Explorer
 testar-completo.bat
+
+# Opção 2: Execute via terminal do Windows
+.\testar-completo.bat
+
+# Opção 3: Execute via PowerShell ou terminal VSCode
+start testar-completo.bat
 ```
 
 Este script compila a solução e executa todos os testes unitários para garantir que tudo está funcionando corretamente.
@@ -89,8 +101,14 @@ Este script compila a solução e executa todos os testes unitários para garant
 ### 3. Executar as APIs
 
 ```bash
-# Execute o script para iniciar as APIs
+# Opção 1: Execute o script diretamente do Windows Explorer
 executar-apis.bat
+
+# Opção 2: Execute via terminal do Windows
+.\executar-apis.bat
+
+# Opção 3: Execute via PowerShell ou terminal VSCode
+start executar-apis.bat
 ```
 
 Este script verifica o ambiente, executa os testes principais e permite iniciar as APIs do sistema interativamente.
@@ -167,6 +185,19 @@ sqllocaldb start mssqllocaldb
 
 # Recriar banco
 setup-banco.bat
+```
+
+### Problemas para executar scripts .bat?
+
+```bash
+# Executar diretamente no prompt de comando (cmd)
+cmd /c setup-banco.bat
+
+# Executar pelo PowerShell com privilégios
+powershell -Command "Start-Process setup-banco.bat -Verb RunAs"
+
+# Verificar se os scripts têm permissão de execução
+icacls setup-banco.bat /grant Everyone:RX
 ```
 
 ### Testes falhando?
@@ -272,11 +303,17 @@ Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalh
 Para executar rapidamente:
 
 ```bash
+# Comando único que configura o banco, testa e executa as APIs
+powershell -Command ".\setup-banco.bat; Start-Sleep -s 2; .\testar-completo.bat; Start-Sleep -s 2; .\executar-apis.bat"
+
 # Restaurar, buildar e executar testes
 dotnet restore && dotnet build && dotnet test
 
-# Executar a API
-dotnet run --project MauricioGym.Api
+# Executar a API Administrador
+dotnet run --project Administrador.Api/MauricioGym.Administrador.Api.csproj
+
+# Executar a API Usuario
+dotnet run --project Usuario.Api/MauricioGym.Usuario.Api.csproj
 ```
 
 ## 📝 Notas
@@ -288,7 +325,8 @@ dotnet run --project MauricioGym.Api
 
 ## 🏋️‍♂️ Dados de Exemplo
 
-Execute o script `sql/script_completo_mauriciogym.sql` para criar:
+Execute o script `sql/setup_completo.sql` para criar:
+
 - 1 administrador: admin@mauriciogym.com
 - 5 alunos já cadastrados
 - Planos (mensal, trimestral, anual)
