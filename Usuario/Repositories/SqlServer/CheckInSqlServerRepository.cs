@@ -18,9 +18,9 @@ namespace MauricioGym.Usuario.Repositories.SqlServer
         {
             using var connection = new SqlConnection(_connectionString);
             const string sql = @"
-                SELECT Id, UsuarioId, DataHora, Removido 
+                SELECT Id, UsuarioId, DataHora, Observacoes, Ativo, DataCriacao, DataAtualizacao 
                 FROM CheckIn 
-                WHERE Removido = 0
+                WHERE Ativo = 1
                 ORDER BY DataHora DESC";
             
             return await connection.QueryAsync<CheckInEntity>(sql);
@@ -30,9 +30,9 @@ namespace MauricioGym.Usuario.Repositories.SqlServer
         {
             using var connection = new SqlConnection(_connectionString);
             const string sql = @"
-                SELECT Id, UsuarioId, DataHora, Removido 
+                SELECT Id, UsuarioId, DataHora, Observacoes, Ativo, DataCriacao, DataAtualizacao 
                 FROM CheckIn 
-                WHERE Id = @Id AND Removido = 0";
+                WHERE Id = @Id AND Ativo = 1";
             
             return await connection.QueryFirstOrDefaultAsync<CheckInEntity>(sql, new { Id = id });
         }
@@ -41,9 +41,9 @@ namespace MauricioGym.Usuario.Repositories.SqlServer
         {
             using var connection = new SqlConnection(_connectionString);
             const string sql = @"
-                SELECT Id, UsuarioId, DataHora, Removido 
+                SELECT Id, UsuarioId, DataHora, Observacoes, Ativo, DataCriacao, DataAtualizacao 
                 FROM CheckIn 
-                WHERE UsuarioId = @UsuarioId AND Removido = 0
+                WHERE UsuarioId = @UsuarioId AND Ativo = 1
                 ORDER BY DataHora DESC";
             
             return await connection.QueryAsync<CheckInEntity>(sql, new { UsuarioId = usuarioId });
@@ -53,9 +53,9 @@ namespace MauricioGym.Usuario.Repositories.SqlServer
         {
             using var connection = new SqlConnection(_connectionString);
             const string sql = @"
-                SELECT Id, UsuarioId, DataHora, Removido 
+                SELECT Id, UsuarioId, DataHora, Observacoes, Ativo, DataCriacao, DataAtualizacao 
                 FROM CheckIn 
-                WHERE DataHora >= @DataInicio AND DataHora <= @DataFim AND Removido = 0
+                WHERE DataHora >= @DataInicio AND DataHora <= @DataFim AND Ativo = 1
                 ORDER BY DataHora DESC";
             
             return await connection.QueryAsync<CheckInEntity>(sql, new { DataInicio = dataInicio, DataFim = dataFim });
@@ -65,8 +65,8 @@ namespace MauricioGym.Usuario.Repositories.SqlServer
         {
             using var connection = new SqlConnection(_connectionString);
             const string sql = @"
-                INSERT INTO CheckIn (UsuarioId, DataHora, Removido)
-                VALUES (@UsuarioId, @DataHora, @Removido);
+                INSERT INTO CheckIn (UsuarioId, DataHora, Observacoes, Ativo, DataCriacao)
+                VALUES (@UsuarioId, @DataHora, @Observacoes, @Ativo, GETDATE());
                 SELECT CAST(SCOPE_IDENTITY() as int)";
             
             return await connection.QuerySingleAsync<int>(sql, checkIn);
@@ -77,8 +77,8 @@ namespace MauricioGym.Usuario.Repositories.SqlServer
             using var connection = new SqlConnection(_connectionString);
             const string sql = @"
                 UPDATE CheckIn 
-                SET UsuarioId = @UsuarioId, DataHora = @DataHora, Removido = @Removido 
-                WHERE Id = @Id AND Removido = 0";
+                SET UsuarioId = @UsuarioId, DataHora = @DataHora, Observacoes = @Observacoes, DataAtualizacao = GETDATE() 
+                WHERE Id = @Id AND Ativo = 1";
             
             var rowsAffected = await connection.ExecuteAsync(sql, checkIn);
             return rowsAffected > 0;
@@ -87,14 +87,16 @@ namespace MauricioGym.Usuario.Repositories.SqlServer
         public async Task<bool> RemoverAsync(int id)
         {
             using var connection = new SqlConnection(_connectionString);
-            const string sql = "UPDATE CheckIn SET Removido = 1 WHERE Id = @Id";
+            const string sql = "UPDATE CheckIn SET Ativo = 0, DataAtualizacao = GETDATE() WHERE Id = @Id";
             
             var rowsAffected = await connection.ExecuteAsync(sql, new { Id = id });
             return rowsAffected > 0;
-        }        public async Task<bool> ExisteAsync(int id)
+        }
+
+        public async Task<bool> ExisteAsync(int id)
         {
             using var connection = new SqlConnection(_connectionString);
-            const string sql = "SELECT COUNT(1) FROM CheckIn WHERE Id = @Id AND Removido = 0";
+            const string sql = "SELECT COUNT(1) FROM CheckIn WHERE Id = @Id AND Ativo = 1";
             
             var count = await connection.ExecuteScalarAsync<int>(sql, new { Id = id });
             return count > 0;
@@ -109,7 +111,7 @@ namespace MauricioGym.Usuario.Repositories.SqlServer
                 WHERE UsuarioId = @UsuarioId 
                   AND YEAR(DataHora) = @Ano 
                   AND MONTH(DataHora) = @Mes 
-                  AND Removido = 0";
+                  AND Ativo = 1";
             
             return await connection.ExecuteScalarAsync<int>(sql, new { UsuarioId = usuarioId, Ano = ano, Mes = mes });
         }

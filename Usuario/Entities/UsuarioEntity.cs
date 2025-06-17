@@ -6,8 +6,9 @@ namespace MauricioGym.Usuario.Entities
         public string Nome { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string Telefone { get; set; } = string.Empty;
-        public DateTime DataCadastro { get; set; }
+        public DateTime DataNascimento { get; set; }
         public bool Ativo { get; set; } = true;
-        public bool Removido { get; set; } = false;
+        public DateTime DataCriacao { get; set; }
+        public DateTime? DataAtualizacao { get; set; }
     }
 }

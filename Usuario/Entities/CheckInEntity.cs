@@ -5,6 +5,9 @@ namespace MauricioGym.Usuario.Entities
         public int Id { get; set; }
         public int UsuarioId { get; set; }
         public DateTime DataHora { get; set; }
-        public bool Removido { get; set; } = false;
+        public string? Observacoes { get; set; }
+        public bool Ativo { get; set; } = true;
+        public DateTime DataCriacao { get; set; }
+        public DateTime? DataAtualizacao { get; set; }
     }
 }

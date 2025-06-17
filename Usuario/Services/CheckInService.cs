@@ -88,13 +88,12 @@ namespace MauricioGym.Usuario.Services
                     throw new ArgumentException("ID do usuário inválido", nameof(usuarioId));
 
                 if (!await PodeRealizarCheckInAsync(usuarioId))
-                    throw new InvalidOperationException("Usuário não pode fazer check-in. Verifique se as mensalidades estão em dia");
-
-                var checkIn = new CheckInEntity
+                    throw new InvalidOperationException("Usuário não pode fazer check-in. Verifique se as mensalidades estão em dia");                var checkIn = new CheckInEntity
                 {
                     UsuarioId = usuarioId,
                     DataHora = DateTime.Now,
-                    Removido = false
+                    Ativo = true,
+                    DataCriacao = DateTime.Now
                 };
 
                 return await _checkInRepository.CriarAsync(checkIn);

@@ -77,13 +77,11 @@ namespace MauricioGym.Usuario.Services
                     throw new ArgumentException("Nome é obrigatório", nameof(usuario));
 
                 if (string.IsNullOrWhiteSpace(usuario.Email))
-                    throw new ArgumentException("Email é obrigatório", nameof(usuario));
-
-                if (await _usuarioRepository.ExisteEmailAsync(usuario.Email))
+                    throw new ArgumentException("Email é obrigatório", nameof(usuario));                if (await _usuarioRepository.ExisteEmailAsync(usuario.Email))
                     throw new InvalidOperationException("Já existe um usuário com este email");
 
-                usuario.DataCadastro = DateTime.Now;
-                usuario.Removido = false;
+                usuario.DataCriacao = DateTime.Now;
+                usuario.Ativo = true;
 
                 return await _usuarioRepository.CriarAsync(usuario);
             }
