@@ -1,8 +1,9 @@
 namespace MauricioGym.Usuario.Entities
-{
-    public class MensalidadeEntity
+{    public class MensalidadeEntity
     {
         public int Id { get; set; }
+        public int UsuarioId { get; set; }
+        public int PlanoId { get; set; }
         public int UsuarioPlanoId { get; set; }
         public int MesReferencia { get; set; }
         public int AnoReferencia { get; set; }

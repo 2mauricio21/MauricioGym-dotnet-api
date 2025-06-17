@@ -1,15 +1,14 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using MauricioGym.Administrador.Entities;
+using MauricioGym.Infra.Shared.Interfaces;
 
 namespace MauricioGym.Administrador.Services.Interfaces
 {
     public interface IPermissaoManipulacaoUsuarioService
     {
-        Task<PermissaoManipulacaoUsuarioEntity> ObterPorIdAsync(int id);
-        Task<IEnumerable<PermissaoManipulacaoUsuarioEntity>> ListarPorUsuarioAsync(int usuarioId);
-        Task<int> CriarAsync(PermissaoManipulacaoUsuarioEntity permissao);
-        Task<bool> AtualizarAsync(PermissaoManipulacaoUsuarioEntity permissao);
-        Task<bool> RemoverAsync(int id);
+        Task<IResultadoValidacao<PermissaoManipulacaoUsuarioEntity?>> ObterPorIdAsync(int id);
+        Task<IResultadoValidacao<IEnumerable<PermissaoManipulacaoUsuarioEntity>>> ListarPorUsuarioAsync(int usuarioId);
+        Task<IResultadoValidacao<int>> CriarAsync(PermissaoManipulacaoUsuarioEntity permissao);
+        Task<IResultadoValidacao<bool>> AtualizarAsync(PermissaoManipulacaoUsuarioEntity permissao);
+        Task<IResultadoValidacao<bool>> RemoverAsync(int id);
     }
 }

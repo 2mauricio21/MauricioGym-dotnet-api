@@ -19,6 +19,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Administrador", "Administra
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Usuario", "Usuario", "{B4FA3203-9F93-437A-82F5-9755079B28E7}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infra", "Infra", "{D8CA65B0-1E2E-4006-80C8-6057A116CBEB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MauricioGym.Infra", "MauricioGym.Infra\MauricioGym.Infra.csproj", "{47E3B311-5A7A-414D-BE11-2233FE597BC8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +53,10 @@ Global
 		{7E60FCAC-331E-4C80-AF25-174FAE6CF7E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7E60FCAC-331E-4C80-AF25-174FAE6CF7E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7E60FCAC-331E-4C80-AF25-174FAE6CF7E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47E3B311-5A7A-414D-BE11-2233FE597BC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47E3B311-5A7A-414D-BE11-2233FE597BC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47E3B311-5A7A-414D-BE11-2233FE597BC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47E3B311-5A7A-414D-BE11-2233FE597BC8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -60,5 +68,9 @@ Global
 		{77C03297-F0A9-48CA-BE66-BB0425C13FB3} = {B4FA3203-9F93-437A-82F5-9755079B28E7}
 		{D0F641B6-09AD-4A3C-ADE7-1FE3E5CEDCA3} = {CD62E99B-C985-4038-BE41-21474A4BCA19}
 		{7E60FCAC-331E-4C80-AF25-174FAE6CF7E7} = {B4FA3203-9F93-437A-82F5-9755079B28E7}
+		{47E3B311-5A7A-414D-BE11-2233FE597BC8} = {D8CA65B0-1E2E-4006-80C8-6057A116CBEB}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {628BD075-D518-4315-9E1B-51AE3E148C14}
 	EndGlobalSection
 EndGlobal

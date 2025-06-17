@@ -1,14 +1,24 @@
 using MauricioGym.Usuario.Entities;
 using MauricioGym.Usuario.Repositories.Interfaces;
 using MauricioGym.Usuario.Services.Interfaces;
+using MauricioGym.Usuario.Services.Validators;
+using MauricioGym.Infra.Services;
+using MauricioGym.Infra.Shared;
+using MauricioGym.Infra.Shared.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace MauricioGym.Usuario.Services
 {
-    public class MensalidadeService : IMensalidadeService
+    public class MensalidadeService : ServiceBase<MensalidadeValidator>, IMensalidadeService
     {
+        #region [ Campos ]
+
         private readonly IMensalidadeSqlServerRepository _mensalidadeRepository;
         private readonly ILogger<MensalidadeService> _logger;
+
+        #endregion
+
+        #region [ Construtor ]
 
         public MensalidadeService(
             IMensalidadeSqlServerRepository mensalidadeRepository,
@@ -18,170 +28,183 @@ namespace MauricioGym.Usuario.Services
             _logger = logger;
         }
 
-        public async Task<IEnumerable<MensalidadeEntity>> ObterTodosAsync()
+        #endregion
+
+        #region [ Métodos Públicos ]
+
+        public async Task<IResultadoValidacao<IEnumerable<MensalidadeEntity>>> ObterTodosAsync()
         {
             try
             {
-                return await _mensalidadeRepository.ObterTodosAsync();
+                var mensalidades = await _mensalidadeRepository.ObterTodosAsync();
+                return new ResultadoValidacao<IEnumerable<MensalidadeEntity>>(mensalidades);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao obter todas as mensalidades");
-                throw;
+                return new ResultadoValidacao<IEnumerable<MensalidadeEntity>>(ex, "Erro ao obter todas as mensalidades");
             }
         }
 
-        public async Task<MensalidadeEntity?> ObterPorIdAsync(int id)
+        public async Task<IResultadoValidacao<MensalidadeEntity?>> ObterPorIdAsync(int id)
         {
             try
             {
-                if (id <= 0)
-                    return null;
+                var validacao = Validator.ValidarId(id);
+                if (validacao.OcorreuErro)
+                    return new ResultadoValidacao<MensalidadeEntity?>(validacao);
 
-                return await _mensalidadeRepository.ObterPorIdAsync(id);
+                var mensalidade = await _mensalidadeRepository.ObterPorIdAsync(id);
+                return new ResultadoValidacao<MensalidadeEntity?>(mensalidade);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao obter mensalidade por ID: {Id}", id);
-                throw;
+                return new ResultadoValidacao<MensalidadeEntity?>(ex, $"Erro ao obter mensalidade com ID {id}");
             }
         }
 
-        public async Task<IEnumerable<MensalidadeEntity>> ObterPorUsuarioAsync(int usuarioId)
+        public async Task<IResultadoValidacao<IEnumerable<MensalidadeEntity>>> ObterPorUsuarioAsync(int usuarioId)
         {
             try
             {
-                if (usuarioId <= 0)
-                    return Enumerable.Empty<MensalidadeEntity>();
+                var validacao = Validator.ValidarUsuarioId(usuarioId);
+                if (validacao.OcorreuErro)
+                    return new ResultadoValidacao<IEnumerable<MensalidadeEntity>>(validacao);
 
-                return await _mensalidadeRepository.ObterPorUsuarioAsync(usuarioId);
+                var mensalidades = await _mensalidadeRepository.ObterPorUsuarioAsync(usuarioId);
+                return new ResultadoValidacao<IEnumerable<MensalidadeEntity>>(mensalidades);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao obter mensalidades por usuário: {UsuarioId}", usuarioId);
-                throw;
+                return new ResultadoValidacao<IEnumerable<MensalidadeEntity>>(ex, $"Erro ao obter mensalidades do usuário {usuarioId}");
             }
         }
 
-        public async Task<IEnumerable<MensalidadeEntity>> ObterPendentesAsync()
+        public async Task<IResultadoValidacao<IEnumerable<MensalidadeEntity>>> ObterPendentesAsync()
         {
             try
             {
-                return await _mensalidadeRepository.ObterPendentesAsync();
+                var mensalidades = await _mensalidadeRepository.ObterPendentesAsync();
+                return new ResultadoValidacao<IEnumerable<MensalidadeEntity>>(mensalidades);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao obter mensalidades pendentes");
-                throw;
+                return new ResultadoValidacao<IEnumerable<MensalidadeEntity>>(ex, "Erro ao obter mensalidades pendentes");
             }
         }
 
-        public async Task<IEnumerable<MensalidadeEntity>> ObterVencendasAsync(int dias = 7)
+        public async Task<IResultadoValidacao<IEnumerable<MensalidadeEntity>>> ObterVencendasAsync(int dias = 7)
         {
             try
             {
-                if (dias < 0)
-                    dias = 7;
+                var validacao = Validator.ValidarDias(dias);
+                if (validacao.OcorreuErro)
+                    return new ResultadoValidacao<IEnumerable<MensalidadeEntity>>(validacao);
 
-                return await _mensalidadeRepository.ObterVencendasAsync(dias);
+                var mensalidades = await _mensalidadeRepository.ObterVencendasAsync(dias);
+                return new ResultadoValidacao<IEnumerable<MensalidadeEntity>>(mensalidades);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao obter mensalidades vencendas em {Dias} dias", dias);
-                throw;
+                return new ResultadoValidacao<IEnumerable<MensalidadeEntity>>(ex, $"Erro ao obter mensalidades vencendas em {dias} dias");
             }
         }
 
-        public async Task<bool> EstaEmDiaAsync(int usuarioId)
+        public async Task<IResultadoValidacao<bool>> EstaEmDiaAsync(int usuarioId)
         {
             try
             {
-                if (usuarioId <= 0)
-                    return false;
+                var validacao = Validator.ValidarUsuarioId(usuarioId);
+                if (validacao.OcorreuErro)
+                    return new ResultadoValidacao<bool>(validacao);
 
-                return await _mensalidadeRepository.EstaEmDiaAsync(usuarioId);
+                var estaEmDia = await _mensalidadeRepository.EstaEmDiaAsync(usuarioId);
+                return new ResultadoValidacao<bool>(estaEmDia);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao verificar se usuário está em dia: {UsuarioId}", usuarioId);
-                throw;
+                return new ResultadoValidacao<bool>(ex, "Erro ao verificar se usuário está em dia");
             }
         }
 
-        public async Task<bool> RemoverAsync(int id)
+        public async Task<IResultadoValidacao<bool>> RemoverAsync(int id)
         {
             try
             {
-                if (id <= 0)
-                    throw new ArgumentException("ID inválido", nameof(id));
+                var validacao = Validator.ValidarId(id);
+                if (validacao.OcorreuErro)
+                    return new ResultadoValidacao<bool>(validacao);
 
-                if (!await _mensalidadeRepository.ExisteAsync(id))
-                    throw new InvalidOperationException("Mensalidade não encontrada");
+                // Verificar se existe
+                var existe = await _mensalidadeRepository.ExisteAsync(id);
+                if (!existe)
+                    return new ResultadoValidacao<bool>("Mensalidade não encontrada.");
 
-                return await _mensalidadeRepository.RemoverAsync(id);
+                var sucesso = await _mensalidadeRepository.RemoverAsync(id);
+                return new ResultadoValidacao<bool>(sucesso);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao remover mensalidade: {Id}", id);
-                throw;
+                return new ResultadoValidacao<bool>(ex, "Erro ao remover mensalidade");
             }
-        }        public async Task<bool> ExisteAsync(int id)
+        }
+
+        public async Task<IResultadoValidacao<bool>> ExisteAsync(int id)
         {
             try
             {
-                if (id <= 0)
-                    return false;
+                var validacao = Validator.ValidarId(id);
+                if (validacao.OcorreuErro)
+                    return new ResultadoValidacao<bool>(validacao);
 
-                return await _mensalidadeRepository.ExisteAsync(id);
+                var existe = await _mensalidadeRepository.ExisteAsync(id);
+                return new ResultadoValidacao<bool>(existe);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao verificar existência da mensalidade: {Id}", id);
-                throw;
+                return new ResultadoValidacao<bool>(ex, "Erro ao verificar existência da mensalidade");
             }
         }
 
-        public async Task<IEnumerable<MensalidadeEntity>> ListarPorUsuarioAsync(int usuarioId)
+        public async Task<IResultadoValidacao<IEnumerable<MensalidadeEntity>>> ListarPorUsuarioAsync(int usuarioId)
         {
             return await ObterPorUsuarioAsync(usuarioId);
         }
 
-        public async Task<MensalidadeEntity?> ObterMensalidadeAtualAsync(int usuarioId)
+        public async Task<IResultadoValidacao<MensalidadeEntity?>> ObterMensalidadeAtualAsync(int usuarioId)
         {
             try
             {
-                if (usuarioId <= 0)
-                    return null;
+                var validacao = Validator.ValidarUsuarioId(usuarioId);
+                if (validacao.OcorreuErro)
+                    return new ResultadoValidacao<MensalidadeEntity?>(validacao);
 
-                return await _mensalidadeRepository.ObterMensalidadeAtualAsync(usuarioId);
+                var mensalidade = await _mensalidadeRepository.ObterMensalidadeAtualAsync(usuarioId);
+                return new ResultadoValidacao<MensalidadeEntity?>(mensalidade);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao obter mensalidade atual do usuário: {UsuarioId}", usuarioId);
-                throw;
+                return new ResultadoValidacao<MensalidadeEntity?>(ex, "Erro ao obter mensalidade atual do usuário");
             }
-        }
-
-        public async Task<int> RegistrarPagamentoMensalidadeAsync(int usuarioId, int planoId, int meses, decimal valorBase, DateTime dataInicio)
+        }        public async Task<IResultadoValidacao<int>> RegistrarPagamentoMensalidadeAsync(int usuarioId, int planoId, int meses, decimal valorBase, DateTime dataInicio)
         {
             try
             {
-                if (usuarioId <= 0)
-                    throw new ArgumentException("ID do usuário inválido", nameof(usuarioId));
-
-                if (planoId <= 0)
-                    throw new ArgumentException("ID do plano inválido", nameof(planoId));
-
-                if (meses <= 0)
-                    throw new ArgumentException("Quantidade de meses deve ser maior que zero", nameof(meses));
-
-                if (valorBase <= 0)
-                    throw new ArgumentException("Valor base deve ser maior que zero", nameof(valorBase));                var valorComDesconto = CalcularValorComDesconto(meses, valorBase);
-
-                // Para a nova estrutura, vamos usar um UsuarioPlanoId fictício por enquanto
-                // Isso deveria vir de um parâmetro do método
+                var valorComDesconto = CalcularValorComDesconto(meses, valorBase);
                 var mesAtual = DateTime.Now.Month;
                 var anoAtual = DateTime.Now.Year;
+                
+                var validacao = Validator.ValidarPagamentoMensalidade(dataInicio, "Paga", valorComDesconto, mesAtual, anoAtual);
+                if (validacao.OcorreuErro)
+                    return new ResultadoValidacao<int>(validacao);
 
                 var mensalidade = new MensalidadeEntity
                 {
@@ -196,16 +219,17 @@ namespace MauricioGym.Usuario.Services
                     DataCriacao = DateTime.Now
                 };
 
-                return await _mensalidadeRepository.CriarAsync(mensalidade);
+                var id = await _mensalidadeRepository.CriarAsync(mensalidade);
+                return new ResultadoValidacao<int>(id);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao registrar pagamento de mensalidade: {UsuarioId}", usuarioId);
-                throw;
+                return new ResultadoValidacao<int>(ex, "Erro ao registrar pagamento de mensalidade");
             }
         }
 
-        public async Task<bool> VerificarMensalidadeEmDiaAsync(int usuarioId)
+        public async Task<IResultadoValidacao<bool>> VerificarMensalidadeEmDiaAsync(int usuarioId)
         {
             return await EstaEmDiaAsync(usuarioId);
         }
@@ -225,5 +249,7 @@ namespace MauricioGym.Usuario.Services
 
             return valorTotal * (1 - percentualDesconto);
         }
+
+        #endregion
     }
 }

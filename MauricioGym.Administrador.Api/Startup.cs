@@ -2,6 +2,7 @@ using MauricioGym.Administrador.Services;
 using MauricioGym.Administrador.Services.Interfaces;
 using MauricioGym.Administrador.Repositories.SqlServer;
 using MauricioGym.Administrador.Repositories.SqlServer.Interfaces;
+using MauricioGym.Infra;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -32,7 +33,12 @@ namespace MauricioGym.Administrador.Api
                     Version = "v1",
                     Description = "API para gerenciamento administrativo do MauricioGym"
                 });
-            });            // Connection String
+            });
+
+            // Configurar a infraestrutura
+            services.ConfigureServicesInfra(Configuration);
+
+            // Connection String
             var connectionString = Configuration.GetConnectionString("DefaultConnection") 
                 ?? "Server=(localdb)\\mssqllocaldb;Database=MauricioGymDB;Trusted_Connection=true;TrustServerCertificate=true;";
 
@@ -47,7 +53,7 @@ namespace MauricioGym.Administrador.Api
             // Repositories
             services.AddScoped<IAdministradorSqlServerRepository>(provider => 
                 new AdministradorSqlServerRepository(connectionString));
-            services.AddScoped<IUsuarioSqlServerRepository>(provider => 
+            services.AddScoped<IUsuarioSqlServerRepository>(provider =>
                 new UsuarioSqlServerRepository(connectionString));
             services.AddScoped<IPlanoSqlServerRepository>(provider => 
                 new PlanoSqlServerRepository(connectionString));

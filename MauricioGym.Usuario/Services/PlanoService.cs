@@ -1,14 +1,24 @@
 using MauricioGym.Usuario.Entities;
 using MauricioGym.Usuario.Repositories.Interfaces;
 using MauricioGym.Usuario.Services.Interfaces;
+using MauricioGym.Usuario.Services.Validators;
+using MauricioGym.Infra.Services;
+using MauricioGym.Infra.Shared;
+using MauricioGym.Infra.Shared.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace MauricioGym.Usuario.Services
 {
-    public class PlanoService : IPlanoService
+    public class PlanoService : ServiceBase<PlanoValidator>, IPlanoService
     {
+        #region [ Campos ]
+
         private readonly IPlanoSqlServerRepository _planoRepository;
         private readonly ILogger<PlanoService> _logger;
+
+        #endregion
+
+        #region [ Construtor ]
 
         public PlanoService(
             IPlanoSqlServerRepository planoRepository,
@@ -18,49 +28,60 @@ namespace MauricioGym.Usuario.Services
             _logger = logger;
         }
 
-        public async Task<IEnumerable<PlanoEntity>> ObterTodosAsync()
+        #endregion
+
+        #region [ Métodos Públicos ]
+
+        public async Task<IResultadoValidacao<IEnumerable<PlanoEntity>>> ObterTodosAsync()
         {
             try
             {
-                return await _planoRepository.ObterTodosAsync();
+                var planos = await _planoRepository.ObterTodosAsync();
+                return new ResultadoValidacao<IEnumerable<PlanoEntity>>(planos);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao obter todos os planos");
-                throw;
+                return new ResultadoValidacao<IEnumerable<PlanoEntity>>(ex, "Erro ao obter todos os planos");
             }
         }
 
-        public async Task<PlanoEntity?> ObterPorIdAsync(int id)
+        public async Task<IResultadoValidacao<PlanoEntity?>> ObterPorIdAsync(int id)
         {
             try
             {
-                if (id <= 0)
-                    return null;
+                var validacao = Validator.ValidarId(id);
+                if (validacao.OcorreuErro)
+                    return new ResultadoValidacao<PlanoEntity?>(validacao);
 
-                return await _planoRepository.ObterPorIdAsync(id);
+                var plano = await _planoRepository.ObterPorIdAsync(id);
+                return new ResultadoValidacao<PlanoEntity?>(plano);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao obter plano por ID: {Id}", id);
-                throw;
+                return new ResultadoValidacao<PlanoEntity?>(ex, $"Erro ao obter plano com ID {id}");
             }
         }
 
-        public async Task<bool> ExisteAsync(int id)
+        public async Task<IResultadoValidacao<bool>> ExisteAsync(int id)
         {
             try
             {
-                if (id <= 0)
-                    return false;
+                var validacao = Validator.ValidarId(id);
+                if (validacao.OcorreuErro)
+                    return new ResultadoValidacao<bool>(validacao);
 
-                return await _planoRepository.ExisteAsync(id);
+                var existe = await _planoRepository.ExisteAsync(id);
+                return new ResultadoValidacao<bool>(existe);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao verificar existência do plano: {Id}", id);
-                throw;
+                return new ResultadoValidacao<bool>(ex, "Erro ao verificar existência do plano");
             }
         }
+
+        #endregion
     }
 }

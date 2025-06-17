@@ -1,14 +1,13 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using MauricioGym.Administrador.Entities;
 using MauricioGym.Administrador.Services.Interfaces;
+using MauricioGym.Infra.Controller;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MauricioGym.Administrador.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AdministradorController : ControllerBase
+    public class AdministradorController : ApiController
     {
         private readonly IAdministradorService _administradorService;
 
@@ -20,40 +19,41 @@ namespace MauricioGym.Administrador.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AdministradorEntity>>> Listar()
         {
-            var administradores = await _administradorService.ListarAsync();
-            return Ok(administradores);
+            var resultado = await _administradorService.ListarAsync();
+            return ProcessarResultado(resultado);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<AdministradorEntity>> ObterPorId(int id)
         {
-            var administrador = await _administradorService.ObterPorIdAsync(id);
-            if (administrador == null) return NotFound();
-            return Ok(administrador);
+            var resultado = await _administradorService.ObterPorIdAsync(id);
+            return ProcessarResultado(resultado);
         }
 
         [HttpPost]
-        public async Task<ActionResult<int>> Criar([FromBody] AdministradorEntity administrador)
-        {
-            var id = await _administradorService.CriarAsync(administrador);
-            return CreatedAtAction(nameof(ObterPorId), new { id }, id);
+        public async Task<ActionResult<int>> Criar([FromBody] AdministradorEntity administrador)        {
+            var resultado = await _administradorService.CriarAsync(administrador);
+            if (resultado.OcorreuErro)
+                return ProcessarResultado(resultado);
+
+            return CreatedAtAction(nameof(ObterPorId), new { id = resultado.Retorno }, resultado.Retorno);
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult> Atualizar(int id, [FromBody] AdministradorEntity administrador)
         {
-            if (id != administrador.Id) return BadRequest();
-            var atualizado = await _administradorService.AtualizarAsync(administrador);
-            if (!atualizado) return NotFound();
-            return NoContent();
+            if (id != administrador.Id) 
+                return BadRequest("ID do parâmetro não confere com o ID do objeto");
+
+            var resultado = await _administradorService.AtualizarAsync(administrador);
+            return ProcessarResultado(resultado);
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> Remover(int id)
         {
-            var removido = await _administradorService.RemoverLogicamenteAsync(id);
-            if (!removido) return NotFound();
-            return NoContent();
+            var resultado = await _administradorService.RemoverLogicamenteAsync(id);
+            return ProcessarResultado(resultado);
         }
     }
 }
