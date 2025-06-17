@@ -20,9 +20,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Usuario\MauricioGym.Usuario.csproj" />
+  </ItemGroup>  <ItemGroup>
+    <ProjectReference Include="..\MauricioGym.Administrador\MauricioGym.Administrador.csproj" />
   </ItemGroup>
 
 </Project>
