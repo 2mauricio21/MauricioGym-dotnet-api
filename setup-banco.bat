@@ -52,8 +52,7 @@ if %SQL_RESULT% EQU 0 (
     echo ================================================================================
     echo                               SUCESSO!
     echo ================================================================================
-    echo O banco MauricioGymDB foi criado com sucesso com todos os dados de exemplo!
-    echo.
+    echo O banco MauricioGymDB foi criado com sucesso com todos os dados de exemplo!    echo.
     echo Proximos passos:
     echo  1. Execute: executar-apis.bat             - Para iniciar as APIs e verificar se tudo esta funcionando
     echo  2. Acesse: http://localhost:5001/swagger - Para a API do Administrador

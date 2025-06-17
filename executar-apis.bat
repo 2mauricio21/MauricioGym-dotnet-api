@@ -98,23 +98,22 @@ choice /c AUBN /m "Sua escolha"
 if errorlevel 4 (
     echo.
     echo Nenhuma API iniciada. Execute este script novamente quando desejar iniciar as APIs.
-) else if errorlevel 3 (
-    echo.
+) else if errorlevel 3 (    echo.
     echo Iniciando ambas as APIs em janelas separadas...
-    start "API Administrador" cmd /c "dotnet run --project Administrador.Api\MauricioGym.Administrador.Api.csproj & pause"
-    start "API Usuario" cmd /c "dotnet run --project Usuario.Api\MauricioGym.Usuario.Api.csproj & pause"
+    start "API Administrador" cmd /c "dotnet run --project Administrador.Api\MauricioGym.Administrador.Api.csproj --environment Development & pause"
+    start "API Usuario" cmd /c "dotnet run --project Usuario.Api\MauricioGym.Usuario.Api.csproj --environment Development & pause"
     echo [OK] Ambas as APIs foram iniciadas!
     echo  - API Administrador: http://localhost:5001/swagger
     echo  - API Usuario: http://localhost:5002/swagger
 ) else if errorlevel 2 (
     echo.
     echo Iniciando API Usuario...
-    start "API Usuario" cmd /c "dotnet run --project Usuario.Api\MauricioGym.Usuario.Api.csproj & pause"
+    start "API Usuario" cmd /c "dotnet run --project Usuario.Api\MauricioGym.Usuario.Api.csproj --environment Development & pause"
     echo [OK] API Usuario iniciada! Acesse: http://localhost:5002/swagger
 ) else (
     echo.
     echo Iniciando API Administrador...
-    start "API Administrador" cmd /c "dotnet run --project Administrador.Api\MauricioGym.Administrador.Api.csproj & pause"
+    start "API Administrador" cmd /c "dotnet run --project Administrador.Api\MauricioGym.Administrador.Api.csproj --environment Development & pause"
     echo [OK] API Administrador iniciada! Acesse: http://localhost:5001/swagger
 )
 

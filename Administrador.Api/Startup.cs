@@ -32,10 +32,9 @@ namespace MauricioGym.Administrador.Api
                     Version = "v1",
                     Description = "API para gerenciamento administrativo do MauricioGym"
                 });
-            });
-
-            // Connection String
-            var connectionString = Configuration.GetConnectionString("DefaultConnection");
+            });            // Connection String
+            var connectionString = Configuration.GetConnectionString("DefaultConnection") 
+                ?? "Server=(localdb)\\mssqllocaldb;Database=MauricioGymDB;Trusted_Connection=true;TrustServerCertificate=true;";
 
             // Services
             services.AddScoped<IAdministradorService, AdministradorService>();
@@ -67,22 +66,19 @@ namespace MauricioGym.Administrador.Api
                     builder.AllowAnyOrigin()
                            .AllowAnyMethod()
                            .AllowAnyHeader();
-                });
-            });
+                });            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
+            // Sempre habilitar Swagger para desenvolvimento e testes
+            app.UseDeveloperExceptionPage();
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
             {
-                app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c =>
-                {
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "MauricioGym - API Administrador v1");
-                    c.RoutePrefix = string.Empty;
-                });
-            }
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "MauricioGym - API Administrador v1");
+                c.RoutePrefix = "swagger";
+            });
 
             app.UseRouting();
             app.UseCors("AllowAll");
