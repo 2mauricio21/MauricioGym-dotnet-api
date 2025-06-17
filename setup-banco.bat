@@ -1,5 +1,8 @@
 @echo off
-echo ================================================================================
+echo ======================================    echo Dados de exemplo disponiveis:
+    echo  - 2 Administradores
+    echo  - 4 Planos (Mensal, Trimestral, Semestral, Anual)
+    echo  - 5 Usuarios======================================
 echo                  MauricioGym - Setup Automatico do Banco de Dados
 echo ================================================================================
 echo.
@@ -83,9 +86,4 @@ if %ERRORLEVEL% EQU 0 (
 
 echo.
 echo Pressione qualquer tecla para sair...
-pause > nul
-)
-
-echo.
-echo Pressione qualquer tecla para fechar...
 pause > nul
