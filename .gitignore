@@ -37,3 +37,9 @@ Thumbs.db
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+# Arquivos de usuário do Visual Studio
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
