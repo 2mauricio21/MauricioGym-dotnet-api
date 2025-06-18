@@ -62,7 +62,7 @@ namespace MauricioGym.Usuario.Services.Validators
             return new ResultadoValidacao();
         }
 
-        public IResultadoValidacao ObterPorPeriodo(DateTime dataInicio, DateTime dataFim)
+        public IResultadoValidacao ValidarPeriodo(DateTime dataInicio, DateTime dataFim)
         {
             if (dataInicio == DateTime.MinValue)
                 return new ResultadoValidacao("A data de início é obrigatória.");
@@ -97,5 +97,14 @@ namespace MauricioGym.Usuario.Services.Validators
 
             return new ResultadoValidacao();
         }
+
+        public IResultadoValidacao ValidarUsuarioId(int usuarioId)
+        {
+            if (usuarioId <= 0)
+                return new ResultadoValidacao("O ID do usuário é obrigatório.");
+
+            return new ResultadoValidacao();
+        }
+
     }
 }

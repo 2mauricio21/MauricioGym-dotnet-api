@@ -1,13 +1,3 @@
-using MauricioGym.Usuario.Services;
-using MauricioGym.Usuario.Services.Interfaces;
-using MauricioGym.Usuario.Repositories.SqlServer;
-using MauricioGym.Usuario.Repositories.Interfaces;
-using MauricioGym.Infra;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 
 namespace MauricioGym.Usuario.Api
@@ -27,30 +17,16 @@ namespace MauricioGym.Usuario.Api
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo 
-                { 
-                    Title = "MauricioGym - API Usuario", 
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "MauricioGym - API Usuario",
                     Version = "v1",
-                    Description = "API para usuários do MauricioGym (Check-in e Mensalidades)"
+                    Description = "API para funcionalidades de usuário do MauricioGym"
                 });
             });
 
-            // Configurar a infraestrutura
-            services.ConfigureServicesInfra(Configuration);
-
-            // Connection String
-            var connectionString = Configuration.GetConnectionString("DefaultConnection") 
-                ?? "Server=(localdb)\\mssqllocaldb;Database=MauricioGymDB;Trusted_Connection=true;TrustServerCertificate=true;";
-
-            // Services
-            services.AddScoped<ICheckInService, CheckInService>();
-            services.AddScoped<IMensalidadeService, MensalidadeService>();
-
-            // Repositories
-            services.AddScoped<ICheckInSqlServerRepository>(provider => 
-                new CheckInSqlServerRepository(connectionString));
-            services.AddScoped<IMensalidadeSqlServerRepository>(provider => 
-                new MensalidadeSqlServerRepository(connectionString));
+            // Configurar serviços do domínio Usuario (padrão Juris)
+            services.ConfigureServicesUsuario(Configuration);
 
             // CORS
             services.AddCors(options =>
@@ -60,7 +36,8 @@ namespace MauricioGym.Usuario.Api
                     builder.AllowAnyOrigin()
                            .AllowAnyMethod()
                            .AllowAnyHeader();
-                });            });
+                });
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

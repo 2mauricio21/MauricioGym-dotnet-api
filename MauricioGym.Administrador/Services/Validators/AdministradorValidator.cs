@@ -7,25 +7,69 @@ namespace MauricioGym.Administrador.Services.Validators
 {
     public class AdministradorValidator : ValidatorService
     {
-        public IResultadoValidacao CriarAdministrador(AdministradorEntity administrador)
+        public IResultadoValidacao ValidarId(int id)
+        {
+            if (id <= 0)
+                return new ResultadoValidacao("O ID do administrador deve ser maior que zero.");
+
+            return new ResultadoValidacao();
+        }
+
+        public IResultadoValidacao ValidarEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return new ResultadoValidacao("O e-mail do administrador é obrigatório.");
+
+            if (!Common.IsValidEmail(email))
+                return new ResultadoValidacao("O e-mail informado é inválido.");
+
+            return new ResultadoValidacao();
+        }
+
+        public IResultadoValidacao ValidarCpf(string cpf)
+        {
+            if (string.IsNullOrWhiteSpace(cpf))
+                return new ResultadoValidacao("O CPF do administrador é obrigatório.");
+
+            if (!Common.ValidarCpf(cpf))
+                return new ResultadoValidacao("O CPF informado é inválido.");
+
+            return new ResultadoValidacao();
+        }
+
+        public IResultadoValidacao ValidarAdministrador(AdministradorEntity administrador)
         {
             if (administrador == null)
-                return new ResultadoValidacao("O administrador não pode ser nulo.");
+                return new ResultadoValidacao("Administrador não informado.");
 
             if (string.IsNullOrWhiteSpace(administrador.Nome))
-                return new ResultadoValidacao("O nome é obrigatório.");
+                return new ResultadoValidacao("O nome do administrador é obrigatório.");
 
-            if (administrador.Nome.Length < 2)
-                return new ResultadoValidacao("O nome deve ter pelo menos 2 caracteres.");
+            if (administrador.Nome.Length < 3)
+                return new ResultadoValidacao("O nome do administrador deve ter pelo menos 3 caracteres.");
 
-            if (string.IsNullOrWhiteSpace(administrador.Email))
-                return new ResultadoValidacao("O email é obrigatório.");
+            var validacaoEmail = ValidarEmail(administrador.Email);
+            if (validacaoEmail.OcorreuErro)
+                return validacaoEmail;
 
-            if (!IsValidEmail(administrador.Email))
-                return new ResultadoValidacao("O email informado é inválido.");
+            var validacaoCpf = ValidarCpf(administrador.Cpf);
+            if (validacaoCpf.OcorreuErro)
+                return validacaoCpf;
+
+            if (string.IsNullOrWhiteSpace(administrador.Telefone))
+                return new ResultadoValidacao("O telefone do administrador é obrigatório.");
+
+            return new ResultadoValidacao();
+        }
+
+        public IResultadoValidacao IncluirAdministrador(AdministradorEntity administrador)
+        {
+            var validacao = ValidarAdministrador(administrador);
+            if (validacao.OcorreuErro)
+                return validacao;
 
             if (string.IsNullOrWhiteSpace(administrador.Senha))
-                return new ResultadoValidacao("A senha é obrigatória.");
+                return new ResultadoValidacao("A senha do administrador é obrigatória.");
 
             if (administrador.Senha.Length < 6)
                 return new ResultadoValidacao("A senha deve ter pelo menos 6 caracteres.");
@@ -33,59 +77,18 @@ namespace MauricioGym.Administrador.Services.Validators
             return new ResultadoValidacao();
         }
 
-        public IResultadoValidacao AtualizarAdministrador(AdministradorEntity administrador)
+        public IResultadoValidacao AlterarAdministrador(AdministradorEntity administrador)
         {
             if (administrador == null)
-                return new ResultadoValidacao("O administrador não pode ser nulo.");
+                return new ResultadoValidacao("Administrador não informado.");
 
-            if (administrador.Id <= 0)
-                return new ResultadoValidacao("O ID do administrador é obrigatório.");
+            if (administrador.Cpf != null && !Common.ValidarCpf(administrador.Cpf))
+                return new ResultadoValidacao("O CPF informado é inválido.");
 
-            if (string.IsNullOrWhiteSpace(administrador.Nome))
-                return new ResultadoValidacao("O nome é obrigatório.");
-
-            if (administrador.Nome.Length < 2)
-                return new ResultadoValidacao("O nome deve ter pelo menos 2 caracteres.");
-
-            if (string.IsNullOrWhiteSpace(administrador.Email))
-                return new ResultadoValidacao("O email é obrigatório.");
-
-            if (!IsValidEmail(administrador.Email))
-                return new ResultadoValidacao("O email informado é inválido.");
+            if (administrador.Email != null && !Common.IsValidEmail(administrador.Email))
+                return new ResultadoValidacao("O e-mail informado é inválido.");
 
             return new ResultadoValidacao();
-        }
-
-        public IResultadoValidacao RemoverAdministrador(int id)
-        {
-            if (id <= 0)
-                return new ResultadoValidacao("Informe o ID do administrador.");
-
-            return new ResultadoValidacao();
-        }
-
-        public IResultadoValidacao ObterAdministradorPorId(int id)
-        {
-            if (id <= 0)
-                return new ResultadoValidacao("Informe o ID do administrador.");
-
-            return new ResultadoValidacao();
-        }
-
-        private static bool IsValidEmail(string email)
-        {
-            if (string.IsNullOrWhiteSpace(email))
-                return false;
-
-            try
-            {
-                var addr = new System.Net.Mail.MailAddress(email);
-                return addr.Address == email;
-            }
-            catch
-            {
-                return false;
-            }
         }
     }
 }

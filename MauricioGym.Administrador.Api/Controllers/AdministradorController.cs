@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MauricioGym.Administrador.Api.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
     public class AdministradorController : ApiController
     {
@@ -17,42 +16,80 @@ namespace MauricioGym.Administrador.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<AdministradorEntity>>> Listar()
+        public async Task<IActionResult> Listar()
         {
-            var resultado = await _administradorService.ListarAsync();
+            var resultado = await _administradorService.ObterTodosAsync();
             return ProcessarResultado(resultado);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<AdministradorEntity>> ObterPorId(int id)
+        public async Task<IActionResult> ObterPorId(int id)
         {
             var resultado = await _administradorService.ObterPorIdAsync(id);
             return ProcessarResultado(resultado);
         }
 
-        [HttpPost]
-        public async Task<ActionResult<int>> Criar([FromBody] AdministradorEntity administrador)        {
-            var resultado = await _administradorService.CriarAsync(administrador);
-            if (resultado.OcorreuErro)
-                return ProcessarResultado(resultado);
+        [HttpGet("email/{email}")]
+        public async Task<IActionResult> ObterPorEmail(string email)
+        {
+            var resultado = await _administradorService.ObterPorEmailAsync(email);
+            return ProcessarResultado(resultado);
+        }
 
-            return CreatedAtAction(nameof(ObterPorId), new { id = resultado.Retorno }, resultado.Retorno);
+        [HttpGet("cpf/{cpf}")]
+        public async Task<IActionResult> ObterPorCpf(string cpf)
+        {
+            var resultado = await _administradorService.ObterPorCpfAsync(cpf);
+            return ProcessarResultado(resultado);
+        }
+
+        [HttpGet("ativos")]
+        public async Task<IActionResult> ListarAtivos()
+        {
+            var resultado = await _administradorService.ObterAtivosAsync();
+            return ProcessarResultado(resultado);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Criar([FromBody] AdministradorEntity administrador)
+        {
+            var resultado = await _administradorService.IncluirAdministradorAsync(administrador, IdUsuario);
+            return ProcessarResultado(resultado);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> Atualizar(int id, [FromBody] AdministradorEntity administrador)
+        public async Task<IActionResult> Alterar(int id, [FromBody] AdministradorEntity administrador)
         {
-            if (id != administrador.Id) 
-                return BadRequest("ID do parâmetro não confere com o ID do objeto");
-
-            var resultado = await _administradorService.AtualizarAsync(administrador);
+            administrador.Id = id;
+            var resultado = await _administradorService.AlterarAdministradorAsync(administrador, IdUsuario);
             return ProcessarResultado(resultado);
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> Remover(int id)
+        public async Task<IActionResult> Excluir(int id)
         {
-            var resultado = await _administradorService.RemoverLogicamenteAsync(id);
+            var resultado = await _administradorService.ExcluirAdministradorAsync(id, IdUsuario);
+            return ProcessarResultado(resultado);
+        }
+
+        [HttpGet("{id}/existe")]
+        public async Task<IActionResult> VerificarExistencia(int id)
+        {
+            var resultado = await _administradorService.ExisteAsync(id);
+            return ProcessarResultado(resultado);
+        }
+
+        [HttpGet("email/{email}/existe")]
+        public async Task<IActionResult> VerificarExistenciaEmail(string email, [FromQuery] int? idExcluir = null)
+        {
+            var resultado = await _administradorService.ExistePorEmailAsync(email, idExcluir);
+            return ProcessarResultado(resultado);
+        }
+
+        [HttpGet("cpf/{cpf}/existe")]
+        public async Task<IActionResult> VerificarExistenciaCpf(string cpf, [FromQuery] int? idExcluir = null)
+        {
+            var resultado = await _administradorService.ExistePorCpfAsync(cpf, idExcluir);
             return ProcessarResultado(resultado);
         }
     }

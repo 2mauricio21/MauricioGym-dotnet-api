@@ -1,35 +1,93 @@
 using Dapper;
+using MauricioGym.Infra.Repositories.SQLServer.Abstracts;
+using MauricioGym.Infra.SQLServer;
 using MauricioGym.Usuario.Entities;
-using MauricioGym.Usuario.Repositories.Interfaces;
+using MauricioGym.Usuario.Repositories.SqlServer.Interfaces;
 using MauricioGym.Usuario.Repositories.SqlServer.Queries;
-using System.Data.SqlClient;
 
 namespace MauricioGym.Usuario.Repositories.SqlServer
 {
-    public class PlanoSqlServerRepository : IPlanoSqlServerRepository
+    public class PlanoSqlServerRepository : SqlServerRepository, IPlanoSqlServerRepository
     {
-        private readonly string _connectionString;
-
-        public PlanoSqlServerRepository(string connectionString)
+        public PlanoSqlServerRepository(SQLServerDbContext sqlServerDbContext) : base(sqlServerDbContext)
         {
-            _connectionString = connectionString;
-        }        public async Task<IEnumerable<PlanoEntity>> ObterTodosAsync()
-        {
-            using var connection = new SqlConnection(_connectionString);
-            return await connection.QueryAsync<PlanoEntity>(PlanoSqlServerQuery.ObterTodos);
         }
 
-        public async Task<PlanoEntity?> ObterPorIdAsync(int id)
+        public async Task<PlanoEntity> ObterPorIdAsync(int id)
         {
-            using var connection = new SqlConnection(_connectionString);
-            return await connection.QueryFirstOrDefaultAsync<PlanoEntity>(PlanoSqlServerQuery.ObterPorId, new { Id = id });
+            var p = new DynamicParameters();
+            p.Add("@Id", id);
+
+            var entidade = await QueryAsync<PlanoEntity>(PlanoSqlServerQuery.ObterPorId, p);
+            return entidade.FirstOrDefault();
+        }
+
+        public async Task<IEnumerable<PlanoEntity>> ObterPorAcademiaIdAsync(int academiaId)
+        {
+            var p = new DynamicParameters();
+            p.Add("@AcademiaId", academiaId);
+
+            return await QueryAsync<PlanoEntity>(PlanoSqlServerQuery.ObterPorAcademiaId, p);
+        }
+
+        public async Task<IEnumerable<PlanoEntity>> ListarAtivosAsync()
+        {
+            return await QueryAsync<PlanoEntity>(PlanoSqlServerQuery.ListarAtivos);
+        }
+
+        public async Task<IEnumerable<PlanoEntity>> ListarPorModalidadeAsync(int modalidadeId)
+        {
+            var p = new DynamicParameters();
+            p.Add("@ModalidadeId", modalidadeId);
+
+            return await QueryAsync<PlanoEntity>(PlanoSqlServerQuery.ListarPorModalidade, p);
+        }
+
+        public async Task<int> CriarAsync(PlanoEntity plano)
+        {
+            await ExecuteNonQueryAsync(PlanoSqlServerQuery.Criar, plano);
+            var ultimoId = await QueryAsync<int>("SELECT SCOPE_IDENTITY()", new DynamicParameters());
+            return ultimoId.FirstOrDefault();
+        }
+
+        public async Task<bool> AtualizarAsync(PlanoEntity plano)
+        {
+            var linhasAfetadas = await ExecuteNonQueryAsync(PlanoSqlServerQuery.Atualizar, plano);
+            return linhasAfetadas > 0;
+        }
+
+        public async Task<bool> ExcluirAsync(int id)
+        {
+            var p = new DynamicParameters();
+            p.Add("@Id", id);
+            p.Add("@DataExclusao", DateTime.Now);
+
+            var linhasAfetadas = await ExecuteNonQueryAsync(PlanoSqlServerQuery.ExcluirLogico, p);
+            return linhasAfetadas > 0;
         }
 
         public async Task<bool> ExisteAsync(int id)
         {
-            using var connection = new SqlConnection(_connectionString);
-            var count = await connection.ExecuteScalarAsync<int>(PlanoSqlServerQuery.Existe, new { Id = id });
-            return count > 0;
+            var p = new DynamicParameters();
+            p.Add("@Id", id);
+
+            var entidades = await QueryAsync<int>(PlanoSqlServerQuery.VerificarExistencia, p);
+            return entidades.FirstOrDefault() > 0;
+        }
+
+        public async Task<bool> ExisteNomeAsync(string nome, int? academiaId)
+        {
+            var p = new DynamicParameters();
+            p.Add("@Nome", nome);
+            p.Add("@AcademiaId", academiaId);
+
+            var entidades = await QueryAsync<int>(PlanoSqlServerQuery.VerificarExistenciaNome, p);
+            return entidades.FirstOrDefault() > 0;
+        }
+
+        public async Task<IEnumerable<PlanoEntity>> ObterTodosAsync()
+        {
+            return await QueryAsync<PlanoEntity>(PlanoSqlServerQuery.ObterTodos);
         }
     }
 }
