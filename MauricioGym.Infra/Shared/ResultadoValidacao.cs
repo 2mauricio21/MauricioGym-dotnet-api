@@ -1,3 +1,4 @@
+using MauricioGym.Infra.Databases.SQLServer.Errors;
 using MauricioGym.Infra.Shared.Interfaces;
 using Microsoft.Data.SqlClient;
 
@@ -31,26 +32,32 @@ namespace MauricioGym.Infra.Shared
 
             if (excecao != null || !string.IsNullOrWhiteSpace(mensagemErro))
             {
-                if (excecao is SqlException)
+                if (excecao as SqlException != null)
                 {
                     if (excecao.Message.Contains("data would be truncated in table"))
                     {
-                        mensagemErro = "O tamanho do campo excede o limite permitido.";
+                        var sqlError = SqlErrorParser.ParseErrorMessageFieldSize(excecao.Message);
+                        if (sqlError != null)
+                            mensagemErro = $"O campo {sqlError.Column} do(a) {sqlError.Table.Replace("MauricioGym.dbo.", string.Empty)} não pode exceder {sqlError.TruncatedValueLength} caracteres.";
                     }
 
                     if (excecao.Message.Contains("Cannot insert duplicate key"))
                     {
-                        mensagemErro = "Este valor já existe no sistema.";
+                        var sqlError = SqlErrorParser.ParseErrorMessageDuplicate(excecao.Message);
+                        if (sqlError != null)
+                            mensagemErro = $"O valor {sqlError.DuplicateValue} já está existe.";
                     }
                 }
 
                 OcorreuErro = true;
                 Excecao = excecao;
                 MensagemErro = mensagemErro;
+
+                // Registrar Erro no AppInsights
+                AppInsigthsLogger.LogException(excecao, mensagemErro);
             }
         }
     }
-
     public class ResultadoValidacao<T> : IResultadoValidacao<T>
     {
         public ResultadoValidacao(IList<IResultadoValidacao> validacoes)
@@ -61,34 +68,47 @@ namespace MauricioGym.Infra.Shared
         public ResultadoValidacao(IResultadoValidacao validacao)
         {
 #if DEBUG
+
             if (validacao.Excecao != null)
                 validacao.MensagemErro += $":\n\n {validacao.Excecao.Message} {validacao.Excecao.StackTrace}";
 #endif
 
-            if (validacao.Excecao is SqlException)
+            if (validacao.Excecao as SqlException != null)
             {
                 if (validacao.Excecao.Message.Contains("data would be truncated in table"))
                 {
-                    validacao.MensagemErro = "O tamanho do campo excede o limite permitido.";
+                    var sqlError = SqlErrorParser.ParseErrorMessageFieldSize(validacao.Excecao.Message);
+                    if (sqlError != null)
+                        validacao.MensagemErro = $"O campo {sqlError.Column} do(a) {sqlError.Table.Replace("MauricioGym.dbo.", string.Empty)} não pode exceder {sqlError.TruncatedValueLength} caracteres.";
                 }
 
                 if (validacao.Excecao.Message.Contains("Cannot insert duplicate key"))
                 {
-                    validacao.MensagemErro = "Este valor já existe no sistema.";
+                    var sqlError = SqlErrorParser.ParseErrorMessageDuplicate(validacao.Excecao.Message);
+                    if (sqlError != null)
+                        validacao.MensagemErro = $"O valor {sqlError.DuplicateValue} já existe.";
                 }
             }
 
             Validacoes ??= new List<IResultadoValidacao> { validacao };
+
+            if (validacao.Excecao != null)
+            {
+                // Registrar Erro no AppInsights
+                AppInsigthsLogger.LogException(validacao.Excecao, validacao.MensagemErro);
+            }
         }
 
         public ResultadoValidacao(string mensagemErro)
             : this(new ResultadoValidacao(mensagemErro))
         {
+
         }
 
         public ResultadoValidacao(Exception ex, string mensagemErro = "")
             : this(new ResultadoValidacao() { OcorreuErro = true, Excecao = ex, MensagemErro = mensagemErro })
         {
+
         }
 
         public ResultadoValidacao(T retorno)
@@ -110,9 +130,9 @@ namespace MauricioGym.Infra.Shared
             }
         }
 
-        public IList<IResultadoValidacao>? Validacoes { get; set; }
+        public IList<IResultadoValidacao> Validacoes { get; set; }
 
-        public T Retorno { get; set; } = default(T)!;
+        public T Retorno { get; set; }
 
         public string MensagemErro
         {
@@ -121,11 +141,13 @@ namespace MauricioGym.Infra.Shared
                 if (Validacoes == null || Validacoes.Count == 0)
                     return string.Empty;
 
-                return Validacoes.FirstOrDefault()?.MensagemErro ?? string.Empty;
+                return Validacoes.FirstOrDefault().MensagemErro;
             }
         }
 
-        public IResultadoValidacao? Erro => Validacoes?.FirstOrDefault();
+
+
+        public IResultadoValidacao Erro => Validacoes.FirstOrDefault();
 
         public bool LimiteExcedido { get; set; }
     }

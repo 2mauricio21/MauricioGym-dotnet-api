@@ -1,16 +1,15 @@
-using MauricioGym.Infra.Config;
-using MauricioGym.Infra.Databases.SqlServer;
-using MauricioGym.Infra.Interfaces;
 using MauricioGym.Infra.Repositories;
-using MauricioGym.Infra.Services;
+using MauricioGym.Infra.Repositories.SqlServer.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Globalization;
+using MauricioGym.Infra.SQLServer;
 
 namespace MauricioGym.Infra
 {
     public static class IServiceCollectionExtension
-    {        private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
+    {
+        private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
             var cultureInfo = new CultureInfo("pt-BR");
             CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
@@ -18,33 +17,21 @@ namespace MauricioGym.Infra
 
             // Configuration
             AppConfiguration.CreateInstance(configuration);
-            configuration = AppConfiguration.GetConfiguration();            // SQL Server
-            services.Configure<SqlServerConnectionOptions>(options => 
-            {
-                options.DefaultConnection = configuration["ConnectionStrings:DefaultConnection"] ?? 
-                                           AppConfig.SqlServerConnectionString;
-            });
-            services.AddScoped<SqlServerDbContext>();
+            configuration = AppConfiguration.GetConfiguration();
 
-            // Services
-            services.AddTransient<IAuditoriaService, AuditoriaService>();
-        }        public static IServiceCollection ConfigureServicesInfra(this IServiceCollection services, IConfiguration? configuration = null)
+            //SQLServerDbContext.Database = configuration["SqlServerDb:Transporte"];
+            services.Configure<SQLServerConnectionOptions>(op => { configuration.GetSection("SqlServerDb").Bind(op); });
+            // SQL Server
+            services.AddScoped<SQLServerDbContext>();
+        }
+
+        public static IServiceCollection ConfigureServicesInfra(this IServiceCollection services, IConfiguration configuration = null)
         {
-            // Se configuration for null, cria uma configuração simples para testes
-            if (configuration == null)
-            {
-                var builder = new ConfigurationBuilder()
-                    .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-                configuration = builder.Build();
-            }
-
             // Services
             ConfigureServices(services, configuration);
 
             // Repositories
             services.AddTransient<ITransactionSqlServerRepository, TransactionSqlServerRepository>();
-
             return services;
         }
     }

@@ -1,4 +1,3 @@
-﻿using MauricioGym.Infra.Interfaces;
 using MauricioGym.Infra.Shared.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +10,6 @@ namespace MauricioGym.Infra.Controller
     [Authorize]
     public class ApiController : ControllerBase, IActionFilter
     {
-        private readonly IAuditoriaService auditoriaService;
         private readonly ServiceProvider serviceProvider;
 
         public ApiController()
@@ -20,10 +18,27 @@ namespace MauricioGym.Infra.Controller
                 .ConfigureServicesInfra()
                 .BuildServiceProvider();
 
-            auditoriaService = serviceProvider.GetService<IAuditoriaService>()!;
         }
 
         private IEnumerable<Claim> Claims => ((ClaimsIdentity)User.Identity!).Claims;
+
+        public int IdUsuario
+        {
+            get
+            {
+                var idUsuario = Claims.FirstOrDefault(x => x.Type.Contains("IdUsuario"))?.Value;
+                if (string.IsNullOrWhiteSpace(idUsuario))
+                {
+                    idUsuario = HttpContext.Request.Headers["IdUsuario"].ToString();
+                    if (!string.IsNullOrWhiteSpace(idUsuario))
+                        return int.Parse(idUsuario);
+                }
+                else
+                    return int.Parse(idUsuario);
+
+                return 0;
+            }
+        }
 
         public int IdAcademia
         {
@@ -57,12 +72,16 @@ namespace MauricioGym.Infra.Controller
         {
             // Implementação básica - pode ser expandida conforme necessário
             // Para controle de acesso, limites, etc.
-        }        [ApiExplorerSettings(IgnoreApi = true)]
+        }
+
+        [ApiExplorerSettings(IgnoreApi = true)]
         public void OnActionExecuted(ActionExecutedContext context)
         {
             // Implementação básica - pode ser expandida conforme necessário
             // Para auditoria, logs, etc.
-        }        protected ActionResult ProcessarResultado<T>(IResultadoValidacao<T> resultado)
+        }
+
+        protected ActionResult ProcessarResultado<T>(IResultadoValidacao<T> resultado)
         {
             if (resultado.OcorreuErro)
             {

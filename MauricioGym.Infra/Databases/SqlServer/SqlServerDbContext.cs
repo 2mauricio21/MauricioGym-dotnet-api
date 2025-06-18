@@ -1,27 +1,30 @@
+
 using MauricioGym.Infra.Config;
-using MauricioGym.Infra.Interfaces;
+using MauricioGym.Infra.SQLServer.Interfaces;
 using Microsoft.Extensions.Options;
 using System.Data;
 using System.Data.Common;
 using Microsoft.Data.SqlClient;
 
-namespace MauricioGym.Infra.Databases.SqlServer
+namespace MauricioGym.Infra.SQLServer
 {
-    public class SqlServerDbContext : IDbContext<SqlConnection>
+    public class SQLServerDbContext : IDbContext<SqlConnection>
     {
         public SqlConnection Connection { get; private set; }
 
-        public static string Database { get; set; } = string.Empty;
+        public static string Database { get; set; }
 
         public bool IsInTransaction { get; private set; }
 
-        public DbTransaction? Transaction { get; private set; }
+        public DbTransaction Transaction { get; private set; }
 
-        private string callerMemberName = string.Empty;        public SqlServerDbContext(IOptions<SqlServerConnectionOptions> options)
+        private string callerMemberName;
+
+        public SQLServerDbContext(IOptions<SQLServerConnectionOptions> options)
         {
-            var connectionString = options.Value.DefaultConnection ?? AppConfig.SqlServerConnectionString;
-            Connection = new SqlConnection(connectionString);
+            Connection = new SqlConnection(AppConfig.SqlServerConnectionString);
         }
+
 
         public void Dispose()
         {
@@ -47,7 +50,7 @@ namespace MauricioGym.Infra.Databases.SqlServer
 
         public async Task CommitAsync(string callerMemberName = "")
         {
-            if (IsInTransaction && this.callerMemberName == callerMemberName && Transaction != null)
+            if (IsInTransaction && this.callerMemberName == callerMemberName)
             {
                 await Transaction.CommitAsync();
                 IsInTransaction = false;
@@ -57,7 +60,7 @@ namespace MauricioGym.Infra.Databases.SqlServer
 
         public async Task RollbackAsync(string callerMemberName = "")
         {
-            if (IsInTransaction && this.callerMemberName == callerMemberName && Transaction != null)
+            if (IsInTransaction && this.callerMemberName == callerMemberName)
             {
                 await Transaction.RollbackAsync();
                 IsInTransaction = false;
@@ -72,7 +75,7 @@ namespace MauricioGym.Infra.Databases.SqlServer
                 if (Connection != null)
                 {
                     Connection.Dispose();
-                    Connection = null!;
+                    Connection = null;
                 }
             }
         }
