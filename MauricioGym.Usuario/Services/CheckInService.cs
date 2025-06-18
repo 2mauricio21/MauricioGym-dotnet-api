@@ -1,5 +1,5 @@
 using MauricioGym.Usuario.Entities;
-using MauricioGym.Usuario.Repositories.Interfaces;
+using MauricioGym.Usuario.Repositories.SqlServer.Interfaces;
 using MauricioGym.Usuario.Services.Interfaces;
 using MauricioGym.Usuario.Services.Validators;
 using MauricioGym.Infra.Services;
@@ -14,7 +14,7 @@ namespace MauricioGym.Usuario.Services
         #region [ Campos ]
 
         private readonly ICheckInSqlServerRepository _checkInRepository;
-        private readonly IMensalidadeService _mensalidadeService;
+        private readonly IPagamentoService _pagamentoService;
         private readonly ILogger<CheckInService> _logger;
 
         #endregion
@@ -23,11 +23,11 @@ namespace MauricioGym.Usuario.Services
 
         public CheckInService(
             ICheckInSqlServerRepository checkInRepository,
-            IMensalidadeService mensalidadeService,
+            IPagamentoService pagamentoService,
             ILogger<CheckInService> logger)
         {
             _checkInRepository = checkInRepository;
-            _mensalidadeService = mensalidadeService;
+            _pagamentoService = pagamentoService;
             _logger = logger;
         }
 
@@ -103,38 +103,58 @@ namespace MauricioGym.Usuario.Services
             }
         }
 
-        public async Task<IResultadoValidacao<int>> RealizarCheckInAsync(int usuarioId)
+        public async Task<IResultadoValidacao<int>> CriarAsync(CheckInEntity checkIn)
         {
             try
             {
-                var validacao = Validator.ValidarUsuarioId(usuarioId);
+                var validacao = Validator.CriarCheckIn(checkIn);
                 if (validacao.OcorreuErro)
-                    return new ResultadoValidacao<int>(validacao);                var podeRealizarResult = await PodeRealizarCheckInAsync(usuarioId);
+                    return new ResultadoValidacao<int>(validacao);
+
+                var podeRealizarResult = await PodeRealizarCheckInAsync(checkIn.UsuarioId);
                 if (podeRealizarResult.OcorreuErro)
                     return new ResultadoValidacao<int>(podeRealizarResult.Erro);
 
                 if (!podeRealizarResult.Retorno)
                     return new ResultadoValidacao<int>("Usuário não pode fazer check-in. Verifique se as mensalidades estão em dia.");
 
-                var checkIn = new CheckInEntity
-                {
-                    UsuarioId = usuarioId,
-                    DataHora = DateTime.Now,
-                    Ativo = true,
-                    DataCriacao = DateTime.Now
-                };
+                // Definir propriedades padrão
+                checkIn.DataCriacao = DateTime.Now;
+                checkIn.Ativo = true;
 
                 var id = await _checkInRepository.CriarAsync(checkIn);
                 return new ResultadoValidacao<int>(id);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao realizar check-in para usuário: {UsuarioId}", usuarioId);
-                return new ResultadoValidacao<int>(ex, "Erro ao realizar check-in");
+                _logger.LogError(ex, "Erro ao criar check-in para usuário: {UsuarioId}", checkIn?.UsuarioId);
+                return new ResultadoValidacao<int>(ex, "Erro ao criar check-in");
             }
         }
 
-        public async Task<IResultadoValidacao<bool>> RemoverAsync(int id)
+        public async Task<IResultadoValidacao<bool>> AtualizarAsync(CheckInEntity checkIn)
+        {
+            try
+            {
+                var validacao = Validator.AtualizarCheckIn(checkIn);
+                if (validacao.OcorreuErro)
+                    return new ResultadoValidacao<bool>(validacao);
+
+                var existe = await _checkInRepository.ExisteAsync(checkIn.Id);
+                if (!existe)
+                    return new ResultadoValidacao<bool>("Check-in não encontrado.");
+
+                var sucesso = await _checkInRepository.AtualizarAsync(checkIn);
+                return new ResultadoValidacao<bool>(sucesso);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao atualizar check-in: {Id}", checkIn?.Id);
+                return new ResultadoValidacao<bool>(ex, "Erro ao atualizar check-in");
+            }
+        }
+
+        public async Task<IResultadoValidacao<bool>> ExcluirAsync(int id)
         {
             try
             {
@@ -146,13 +166,13 @@ namespace MauricioGym.Usuario.Services
                 if (!existe)
                     return new ResultadoValidacao<bool>("Check-in não encontrado.");
 
-                var sucesso = await _checkInRepository.RemoverAsync(id);
+                var sucesso = await _checkInRepository.ExcluirAsync(id);
                 return new ResultadoValidacao<bool>(sucesso);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao remover check-in: {Id}", id);
-                return new ResultadoValidacao<bool>(ex, "Erro ao remover check-in");
+                _logger.LogError(ex, "Erro ao excluir check-in: {Id}", id);
+                return new ResultadoValidacao<bool>(ex, "Erro ao excluir check-in");
             }
         }
 
@@ -174,53 +194,21 @@ namespace MauricioGym.Usuario.Services
             }
         }
 
-        public async Task<IResultadoValidacao<int>> CriarAsync(CheckInEntity checkIn)
-        {
-            try
-            {
-                var validacao = Validator.CriarCheckIn(checkIn);
-                if (validacao.OcorreuErro)
-                    return new ResultadoValidacao<int>(validacao);                var podeRealizarResult = await PodeRealizarCheckInAsync(checkIn.UsuarioId);
-                if (podeRealizarResult.OcorreuErro)
-                    return new ResultadoValidacao<int>(podeRealizarResult.Erro);
-
-                if (!podeRealizarResult.Retorno)
-                    return new ResultadoValidacao<int>("Usuário não pode fazer check-in. Verifique se as mensalidades estão em dia.");
-
-                // Definir propriedades padrão
-                checkIn.DataCriacao = DateTime.Now;
-                checkIn.Ativo = true;
-
-                var id = await _checkInRepository.CriarAsync(checkIn);
-                return new ResultadoValidacao<int>(id);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao criar check-in para usuário: {UsuarioId}", checkIn?.UsuarioId);
-                return new ResultadoValidacao<int>(ex, "Erro ao criar check-in");
-            }
-        }
-
-        public async Task<IResultadoValidacao<IEnumerable<CheckInEntity>>> ListarPorUsuarioAsync(int usuarioId)
-        {
-            return await ObterPorUsuarioAsync(usuarioId);
-        }
-
         public async Task<IResultadoValidacao<int>> ContarCheckInsPorUsuarioMesAsync(int usuarioId, int ano, int mes)
         {
             try
             {
-                var validacao = Validator.ValidarUsuarioMesAno(usuarioId, mes, ano);
+                var validacao = Validator.ValidarUsuarioId(usuarioId);
                 if (validacao.OcorreuErro)
                     return new ResultadoValidacao<int>(validacao);
 
-                var contador = await _checkInRepository.ContarCheckInsPorUsuarioMesAsync(usuarioId, ano, mes);
-                return new ResultadoValidacao<int>(contador);
+                var count = await _checkInRepository.ContarCheckInsPorUsuarioMesAsync(usuarioId, ano, mes);
+                return new ResultadoValidacao<int>(count);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao contar check-ins por mês: {UsuarioId}, {Ano}, {Mes}", usuarioId, ano, mes);
-                return new ResultadoValidacao<int>(ex, "Erro ao contar check-ins por mês");
+                _logger.LogError(ex, "Erro ao contar check-ins por usuário e mês: {UsuarioId}, {Ano}, {Mes}", usuarioId, ano, mes);
+                return new ResultadoValidacao<int>(ex, "Erro ao contar check-ins por usuário e mês");
             }
         }
 
@@ -232,12 +220,18 @@ namespace MauricioGym.Usuario.Services
                 if (validacao.OcorreuErro)
                     return new ResultadoValidacao<bool>(validacao);
 
-                return await _mensalidadeService.VerificarMensalidadeEmDiaAsync(usuarioId);
+                // Verificar se há pagamentos em atraso
+                var pagamentosEmAtraso = await _pagamentoService.ObterPagamentosEmAtrasoPorUsuarioAsync(usuarioId);
+                if (pagamentosEmAtraso.OcorreuErro)
+                    return new ResultadoValidacao<bool>(pagamentosEmAtraso.Erro);
+
+                var podeRealizar = !pagamentosEmAtraso.Retorno.Any();
+                return new ResultadoValidacao<bool>(podeRealizar);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao verificar se pode realizar check-in: {UsuarioId}", usuarioId);
-                return new ResultadoValidacao<bool>(ex, "Erro ao verificar se pode realizar check-in");
+                _logger.LogError(ex, "Erro ao verificar se usuário pode realizar check-in: {UsuarioId}", usuarioId);
+                return new ResultadoValidacao<bool>(ex, "Erro ao verificar se usuário pode realizar check-in");
             }
         }
 

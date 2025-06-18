@@ -1,52 +1,133 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Dapper;
 using MauricioGym.Administrador.Entities;
 using MauricioGym.Administrador.Repositories.SqlServer.Interfaces;
 using MauricioGym.Administrador.Repositories.SqlServer.Queries;
-using System.Data.SqlClient;
+using MauricioGym.Infra.Repositories.SQLServer.Abstracts;
+using MauricioGym.Infra.SQLServer;
+using System.Data;
 
 namespace MauricioGym.Administrador.Repositories.SqlServer
 {
-    public class AdministradorSqlServerRepository : IAdministradorSqlServerRepository
+    public class AdministradorSqlServerRepository : SqlServerRepository, IAdministradorSqlServerRepository
     {
-        private readonly string _connectionString;
-
-        public AdministradorSqlServerRepository(string connectionString)
+        public AdministradorSqlServerRepository(SQLServerDbContext sqlServerDbContext)
+            : base(sqlServerDbContext)
         {
-            _connectionString = connectionString;
         }
 
-        public async Task<AdministradorEntity> ObterPorIdAsync(int id)
+        public async Task<AdministradorEntity?> ObterPorIdAsync(int id)
         {
-            using var connection = new SqlConnection(_connectionString);
-            return await connection.QueryFirstOrDefaultAsync<AdministradorEntity>(AdministradorSqlServerQuery.ObterPorId, new { Id = id });
+            var p = new DynamicParameters();
+            p.Add("@Id", id, DbType.Int32);
+            var entidade = await QueryAsync<AdministradorEntity>(AdministradorSqlServerQuery.ObterPorId, p);
+            return entidade.FirstOrDefault();
         }
 
-        public async Task<IEnumerable<AdministradorEntity>> ListarAsync()
+        public async Task<AdministradorEntity?> ObterPorEmailAsync(string email)
         {
-            using var connection = new SqlConnection(_connectionString);
-            return await connection.QueryAsync<AdministradorEntity>(AdministradorSqlServerQuery.Listar);
+            var p = new DynamicParameters();
+            p.Add("@Email", email, DbType.String);
+            var entidade = await QueryAsync<AdministradorEntity>(
+                AdministradorSqlServerQuery.ObterPorEmail,
+                p);
+            return entidade.FirstOrDefault();
+        }
+
+        public async Task<AdministradorEntity?> ObterPorCpfAsync(string cpf)
+        {
+            var p = new DynamicParameters();
+            p.Add("@Cpf", cpf, DbType.String);
+            p.Add("@Email", cpf, DbType.String);
+            var entidade = await QueryAsync<AdministradorEntity>(
+                AdministradorSqlServerQuery.ObterPorCpf,
+                p);
+            return entidade.FirstOrDefault();
+        }
+
+        public async Task<IEnumerable<AdministradorEntity>> ObterTodosAsync()
+        {
+            return await QueryAsync<AdministradorEntity>(
+                AdministradorSqlServerQuery.ObterTodos);
+        }
+
+        public async Task<IEnumerable<AdministradorEntity>> ObterAtivosAsync()
+        {
+            return await QueryAsync<AdministradorEntity>(
+                AdministradorSqlServerQuery.ObterAtivos);
         }
 
         public async Task<int> CriarAsync(AdministradorEntity administrador)
         {
-            using var connection = new SqlConnection(_connectionString);
-            return await connection.ExecuteScalarAsync<int>(AdministradorSqlServerQuery.InserirAdministrador, administrador);
+
+            var entidade = await QueryAsync<int>(
+                AdministradorSqlServerQuery.Criar,
+                administrador);
+            return entidade.FirstOrDefault();
         }
 
         public async Task<bool> AtualizarAsync(AdministradorEntity administrador)
         {
-            using var connection = new SqlConnection(_connectionString);
-            var result = await connection.ExecuteAsync(AdministradorSqlServerQuery.Atualizar, administrador);
-            return result > 0;
+            var linhasAfetadas = await ExecuteNonQueryAsync(
+                AdministradorSqlServerQuery.Atualizar,
+                administrador);
+
+            return linhasAfetadas > 0;
         }
 
-        public async Task<bool> RemoverLogicamenteAsync(int id)
+        public async Task<bool> ExcluirAsync(int id, int usuarioId)
         {
-            using var connection = new SqlConnection(_connectionString);
-            var result = await connection.ExecuteAsync(AdministradorSqlServerQuery.RemoverLogico, new { Id = id });
-            return result > 0;
+            var entidade = new AdministradorEntity
+            {
+                Id = id,
+                DataExclusao = DateTime.Now,
+                UsuarioAlteracao = usuarioId
+            };
+
+            var linhasAfetadas = await ExecuteNonQueryAsync(
+                AdministradorSqlServerQuery.ExcluirLogico,
+                entidade);
+
+            return linhasAfetadas > 0;
+        }
+
+        public async Task<bool> ExisteAsync(int id)
+        {
+            var entidade = new AdministradorEntity { Id = id };
+            var count = await QueryAsync<int>(
+                AdministradorSqlServerQuery.VerificarExistencia,
+                entidade);
+
+            return count != null;
+        }
+
+        public async Task<bool> ExistePorEmailAsync(string email, int? idExcluir = null)
+        {
+            var entidade = new AdministradorEntity
+            {
+                Email = email,
+                Id = idExcluir ?? 0
+            };
+
+            var count = await QueryAsync<int>(
+                AdministradorSqlServerQuery.VerificarExistenciaPorEmail,
+                entidade);
+
+            return count != null;
+        }
+
+        public async Task<bool> ExistePorCpfAsync(string cpf, int? idExcluir = null)
+        {
+            var entidade = new AdministradorEntity
+            {
+                Cpf = cpf,
+                Id = idExcluir ?? 0
+            };
+
+            var count = await QueryAsync<int>(
+                AdministradorSqlServerQuery.VerificarExistenciaPorCpf,
+                entidade);
+
+            return count != null;
         }
     }
 }

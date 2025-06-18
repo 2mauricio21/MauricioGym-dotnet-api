@@ -1,5 +1,8 @@
+using MauricioGym.Infra.Entities.Interfaces;
+
 namespace MauricioGym.Usuario.Entities
-{    public class UsuarioEntity
+{
+    public class UsuarioEntity : IEntity
     {
         public int Id { get; set; }
         public string Nome { get; set; } = string.Empty;
@@ -8,7 +11,10 @@ namespace MauricioGym.Usuario.Entities
         public string Senha { get; set; } = string.Empty;
         public DateTime DataNascimento { get; set; }
         public bool Ativo { get; set; } = true;
-        public DateTime DataCriacao { get; set; }
-        public DateTime? DataAtualizacao { get; set; }
+        public DateTime DataInclusao { get; set; }
+        public DateTime? DataAlteracao { get; set; }
+        public DateTime? DataExclusao { get; set; }
+        public int UsuarioInclusao { get; set; }
+        public int? UsuarioAlteracao { get; set; }
     }
 }
