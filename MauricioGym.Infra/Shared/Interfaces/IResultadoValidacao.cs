@@ -6,9 +6,9 @@ namespace MauricioGym.Infra.Shared.Interfaces
 
         T Retorno { get; set; }
 
-        IList<IResultadoValidacao>? Validacoes { get; set; }
+        IList<IResultadoValidacao> Validacoes { get; set; }
 
-        IResultadoValidacao? Erro { get; }
+        IResultadoValidacao Erro { get; }
 
         string MensagemErro { get; }
 
@@ -21,7 +21,7 @@ namespace MauricioGym.Infra.Shared.Interfaces
 
         string MensagemErro { get; set; }
 
-        Exception? Excecao { get; set; }
+        Exception Excecao { get; set; }
 
         public bool LimiteExcedido { get; set; }
     }
