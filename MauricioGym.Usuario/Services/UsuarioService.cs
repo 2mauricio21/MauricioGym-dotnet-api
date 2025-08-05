@@ -14,15 +14,15 @@ namespace MauricioGym.Usuario.Services
 {
     public class UsuarioService : ServiceBase<UsuarioValidator>, IUsuarioService
     {
-        private readonly IUsuarioSqlServerRepository _usuarioRepository;
-        private readonly IAuditoriaService _auditoriaService;
+        private readonly IUsuarioSqlServerRepository usuarioSqlServerRepository;
+        private readonly IAuditoriaService auditoriaService;
 
         public UsuarioService(
             IUsuarioSqlServerRepository usuarioRepository,
             IAuditoriaService auditoriaService)
         {
-            _usuarioRepository = usuarioRepository;
-            _auditoriaService = auditoriaService;
+            usuarioSqlServerRepository = usuarioRepository ?? throw new ArgumentNullException(nameof(usuarioRepository));
+            this.auditoriaService = auditoriaService ?? throw new ArgumentNullException(nameof(auditoriaService));
         }
 
         public async Task<IResultadoValidacao<int>> IncluirUsuarioAsync(UsuarioEntity usuario)
@@ -34,9 +34,9 @@ namespace MauricioGym.Usuario.Services
             usuario.DataCadastro = DateTime.Now;
             usuario.Ativo = true;
             
-            var usuarioCriado = await _usuarioRepository.IncluirUsuarioAsync(usuario);
+            var usuarioCriado = await usuarioSqlServerRepository.IncluirUsuarioAsync(usuario);
             
-            await _auditoriaService.RegistrarAuditoriaAsync(
+            await auditoriaService.IncluirAuditoriaAsync(
                 usuarioCriado.IdUsuario, 
                 $"Usuário criado: {usuarioCriado.Nome} ({usuarioCriado.Email})");
 
@@ -49,7 +49,7 @@ namespace MauricioGym.Usuario.Services
             if (validacao.OcorreuErro)
                 return new ResultadoValidacao<UsuarioEntity>(validacao);
 
-            var usuario = await _usuarioRepository.ConsultarUsuarioAsync(idUsuario);
+            var usuario = await usuarioSqlServerRepository.ConsultarUsuarioAsync(idUsuario);
             if (usuario == null)
                 return new ResultadoValidacao<UsuarioEntity>("Usuário não encontrado.");
 
@@ -61,7 +61,7 @@ namespace MauricioGym.Usuario.Services
             if (string.IsNullOrWhiteSpace(email))
                 return new ResultadoValidacao<UsuarioEntity>("Email é obrigatório.");
 
-            var usuario = await _usuarioRepository.ConsultarUsuarioPorEmailAsync(email);
+            var usuario = await usuarioSqlServerRepository.ConsultarUsuarioPorEmailAsync(email);
             if (usuario == null)
                 return new ResultadoValidacao<UsuarioEntity>("Usuário não encontrado.");
 
@@ -73,7 +73,7 @@ namespace MauricioGym.Usuario.Services
             if (string.IsNullOrWhiteSpace(cpf))
                 return new ResultadoValidacao<UsuarioEntity>("CPF é obrigatório.");
 
-            var usuario = await _usuarioRepository.ConsultarUsuarioPorCPFAsync(cpf);
+            var usuario = await usuarioSqlServerRepository.ConsultarUsuarioPorCPFAsync(cpf);
             if (usuario == null)
                 return new ResultadoValidacao<UsuarioEntity>("Usuário não encontrado.");
 
@@ -86,13 +86,13 @@ namespace MauricioGym.Usuario.Services
             if (validacao.OcorreuErro)
                 return validacao;
 
-            var usuarioExistente = await _usuarioRepository.ConsultarUsuarioAsync(usuario.IdUsuario);
+            var usuarioExistente = await usuarioSqlServerRepository.ConsultarUsuarioAsync(usuario.IdUsuario);
             if (usuarioExistente == null)
                 return new ResultadoValidacao("Usuário não encontrado.");
 
-            await _usuarioRepository.AlterarUsuarioAsync(usuario);
+            await usuarioSqlServerRepository.AlterarUsuarioAsync(usuario);
             
-            await _auditoriaService.RegistrarAuditoriaAsync(
+            await auditoriaService.IncluirAuditoriaAsync(
                 usuario.IdUsuario, 
                 $"Usuário alterado: {usuario.Nome} ({usuario.Email})");
 
@@ -105,13 +105,13 @@ namespace MauricioGym.Usuario.Services
             if (validacao.OcorreuErro)
                 return validacao;
 
-            var usuario = await _usuarioRepository.ConsultarUsuarioAsync(idUsuario);
+            var usuario = await usuarioSqlServerRepository.ConsultarUsuarioAsync(idUsuario);
             if (usuario == null)
                 return new ResultadoValidacao("Usuário não encontrado.");
 
-            await _usuarioRepository.ExcluirUsuarioAsync(idUsuario);
+            await usuarioSqlServerRepository.ExcluirUsuarioAsync(idUsuario);
             
-            await _auditoriaService.RegistrarAuditoriaAsync(
+            await auditoriaService.IncluirAuditoriaAsync(
                 idUsuario, 
                 $"Usuário excluído: {usuario.Nome} ({usuario.Email})");
 
@@ -120,13 +120,13 @@ namespace MauricioGym.Usuario.Services
 
         public async Task<IResultadoValidacao<IEnumerable<UsuarioEntity>>> ListarUsuariosAsync()
         {
-            var usuarios = await _usuarioRepository.ListarUsuariosAsync();
+            var usuarios = await usuarioSqlServerRepository.ListarUsuariosAsync();
             return new ResultadoValidacao<IEnumerable<UsuarioEntity>>(usuarios);
         }
 
         public async Task<IResultadoValidacao<IEnumerable<UsuarioEntity>>> ListarUsuariosAtivosAsync()
         {
-            var usuarios = await _usuarioRepository.ListarUsuariosAtivosAsync();
+            var usuarios = await usuarioSqlServerRepository.ListarUsuariosAtivosAsync();
             return new ResultadoValidacao<IEnumerable<UsuarioEntity>>(usuarios);
         }
 
@@ -138,7 +138,7 @@ namespace MauricioGym.Usuario.Services
             if (string.IsNullOrWhiteSpace(senha))
                 return new ResultadoValidacao<bool>("Senha é obrigatória.");
 
-            var usuario = await _usuarioRepository.ConsultarUsuarioPorEmailAsync(email);
+            var usuario = await usuarioSqlServerRepository.ConsultarUsuarioPorEmailAsync(email);
             if (usuario == null || !usuario.Ativo)
                 return new ResultadoValidacao<bool>("Usuário não encontrado ou inativo.");
 
@@ -148,15 +148,15 @@ namespace MauricioGym.Usuario.Services
             if (senhaValida)
             {
                 usuario.DataUltimoLogin = DateTime.Now;
-                await _usuarioRepository.AlterarUsuarioAsync(usuario);
+                await usuarioSqlServerRepository.AlterarUsuarioAsync(usuario);
                 
-                await _auditoriaService.RegistrarAuditoriaAsync(
+                await auditoriaService.IncluirAuditoriaAsync(
                     usuario.IdUsuario, 
                     "Login realizado com sucesso");
             }
             else
             {
-                await _auditoriaService.RegistrarAuditoriaAsync(
+                await auditoriaService.IncluirAuditoriaAsync(
                     usuario.IdUsuario, 
                     "Tentativa de login falhou");
             }

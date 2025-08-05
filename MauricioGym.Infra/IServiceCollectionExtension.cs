@@ -1,5 +1,8 @@
 using MauricioGym.Infra.Repositories;
 using MauricioGym.Infra.Repositories.SqlServer.Interfaces;
+using MauricioGym.Infra.Repositories.SQLServer;
+using MauricioGym.Infra.Services;
+using MauricioGym.Infra.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Globalization;
@@ -32,6 +35,11 @@ namespace MauricioGym.Infra
 
             // Repositories
             services.AddTransient<ITransactionSqlServerRepository, TransactionSqlServerRepository>();
+            services.AddTransient<IAuditoriaSqlServerRepository, AuditoriaSqlServerRepository>();
+            
+            // Services
+            services.AddTransient<IAuditoriaService, AuditoriaService>();
+            
             return services;
         }
     }

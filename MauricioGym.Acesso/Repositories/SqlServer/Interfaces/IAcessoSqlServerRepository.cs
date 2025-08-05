@@ -9,13 +9,11 @@ namespace MauricioGym.Acesso.Repositories.SqlServer.Interfaces
     {
         Task<AcessoEntity> IncluirAcessoAsync(AcessoEntity acesso);
         Task<AcessoEntity> ConsultarAcessoAsync(int idAcesso);
-        Task AlterarAcessoAsync(AcessoEntity acesso);
+        Task<bool> AlterarAcessoAsync(AcessoEntity acesso);
+        Task<bool> RegistrarSaidaAsync(int idAcesso, DateTime dataSaida);
         Task<IEnumerable<AcessoEntity>> ListarAcessosAsync();
-        Task<IEnumerable<AcessoEntity>> ListarAcessosPorUsuarioAsync(int idUsuario);
-        Task<IEnumerable<AcessoEntity>> ListarAcessosPorAcademiaAsync(int idAcademia);
-        Task<IEnumerable<AcessoEntity>> ListarAcessosAtivosAsync();
-        Task<BloqueioAcessoEntity> IncluirBloqueioAsync(BloqueioAcessoEntity bloqueio);
-        Task<BloqueioAcessoEntity> ConsultarBloqueioAtivoAsync(int idUsuario, int idAcademia);
-        Task<IEnumerable<BloqueioAcessoEntity>> ListarBloqueiosPorUsuarioAsync(int idUsuario);
+        Task<IEnumerable<AcessoEntity>> ConsultarAcessosPorUsuarioAsync(int idUsuario);
+        Task<IEnumerable<AcessoEntity>> ConsultarAcessosPorAcademiaAsync(int idAcademia);
+        Task<IEnumerable<AcessoEntity>> ConsultarAcessosAtivosPorAcademiaAsync(int idAcademia);
     }
 }

@@ -7,12 +7,15 @@ namespace MauricioGym.Pagamento.Repositories.SqlServer.Interfaces
 {
     public interface IPagamentoSqlServerRepository : ISqlServerRepository
     {
-        Task<PagamentoEntity> IncluirPagamentoAsync(PagamentoEntity pagamento);
-        Task<PagamentoEntity> ConsultarPagamentoAsync(int idPagamento);
-        Task<PagamentoEntity> ConsultarPagamentoPorTransacaoAsync(string transacaoId);
-        Task AlterarPagamentoAsync(PagamentoEntity pagamento);
-        Task<IEnumerable<PagamentoEntity>> ListarPagamentosAsync();
-        Task<IEnumerable<PagamentoEntity>> ListarPagamentosPorUsuarioAsync(int idUsuario);
-        Task<IEnumerable<PagamentoEntity>> ListarPagamentosPorStatusAsync(string status);
+        Task<PagamentoEntity> IncluirAsync(PagamentoEntity pagamento);
+        Task<PagamentoEntity> ObterPorIdAsync(int idPagamento);
+        Task<PagamentoEntity> ObterPorTransacaoAsync(string transacaoId);
+        Task AtualizarAsync(PagamentoEntity pagamento);
+        Task<bool> CancelarAsync(int idPagamento);
+        Task<IEnumerable<PagamentoEntity>> ListarTodosAsync();
+        Task<IEnumerable<PagamentoEntity>> ListarPorUsuarioAsync(int idUsuario);
+        Task<IEnumerable<PagamentoEntity>> ListarPorUsuarioPlanoAsync(int idUsuarioPlano);
+        Task<IEnumerable<PagamentoEntity>> ListarPorStatusAsync(string status);
+        Task<IEnumerable<PagamentoEntity>> ListarPendentesAsync();
     }
 }

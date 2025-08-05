@@ -7,11 +7,11 @@ namespace MauricioGym.Pagamento.Entities
     {
         public int IdFormaPagamento { get; set; }
         public int IdAcademia { get; set; }
-        public string Nome { get; set; } = string.Empty;
-        public string Descricao { get; set; } = string.Empty;
-        public bool AceitaParcelamento { get; set; } = false;
-        public int MaximoParcelas { get; set; } = 1;
+        public string Nome { get; set; }
+        public string Descricao { get; set; }
+        public bool AceitaParcelamento { get; set; }
+        public int MaximoParcelas { get; set; }
         public decimal? TaxaProcessamento { get; set; }
-        public bool Ativo { get; set; } = true;
+        public bool Ativo { get; set; }
     }
 }
