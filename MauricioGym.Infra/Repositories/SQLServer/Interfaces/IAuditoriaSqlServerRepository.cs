@@ -7,8 +7,7 @@ namespace MauricioGym.Infra.Repositories.SqlServer.Interfaces
 {
     public interface IAuditoriaSqlServerRepository : ISqlServerRepository
     {
-        Task<AuditoriaEntity> IncluirAuditoriaAsync(AuditoriaEntity auditoria);
-        Task<IEnumerable<AuditoriaEntity>> ListarAuditoriasAsync();
-        Task<IEnumerable<AuditoriaEntity>> ListarAuditoriasPorUsuarioAsync(int idUsuario);
+        Task<AuditoriaEntity> ConsultarAuditoriaAsync(int idAuditoria);
+        Task<AuditoriaEntity> CriarAuditoriaAsync(AuditoriaEntity auditoria);
     }
 }

@@ -21,9 +21,9 @@ namespace MauricioGym.Infra.Services.Validators
             }
         }
 
-        public IResultadoValidacao ValidarId(int id)
+        protected IResultadoValidacao ValidarId(int? id)
         {
-            if (id <= 0)
+            if (id.GetValueOrDefault(0) < 0)
                 return new ResultadoValidacao("O ID Inválido.");
 
             return new ResultadoValidacao();

@@ -10,37 +10,33 @@ using System.Data;
 
 namespace MauricioGym.Infra.Repositories.SQLServer
 {
-    public class AuditoriaSqlServerRepository : SqlServerRepository, IAuditoriaSqlServerRepository
+  public class AuditoriaSqlServerRepository : SqlServerRepository, IAuditoriaSqlServerRepository
+  {
+    public AuditoriaSqlServerRepository(SQLServerDbContext sqlServerDbContext) : base(sqlServerDbContext)
     {
-        public AuditoriaSqlServerRepository(SQLServerDbContext sQLServerDbContext) : base(sQLServerDbContext)
-        {
-        }
-
-        public async Task<AuditoriaEntity> IncluirAuditoriaAsync(AuditoriaEntity auditoria)
-        {
-            var p = new DynamicParameters();
-            p.Add("@IdUsuario", auditoria.IdUsuario);
-            p.Add("@Descricao", auditoria.Descricao);
-            p.Add("@Data", auditoria.Data);
-            p.Add("@IdAuditoria", dbType: DbType.Int32, direction: ParameterDirection.Output);
-
-            await QueryAsync<AuditoriaEntity>(AuditoriaSqlServerQuery.Criar, p);
-            
-            auditoria.IdAuditoria = p.Get<int>("@IdAuditoria");
-            return auditoria;
-        }
-
-        public async Task<IEnumerable<AuditoriaEntity>> ListarAuditoriasAsync()
-        {
-            return await QueryAsync<AuditoriaEntity>(AuditoriaSqlServerQuery.ObterTodos);
-        }
-
-        public async Task<IEnumerable<AuditoriaEntity>> ListarAuditoriasPorUsuarioAsync(int idUsuario)
-        {
-            var p = new DynamicParameters();
-            p.Add("@IdUsuario", idUsuario);
-            
-            return await QueryAsync<AuditoriaEntity>(AuditoriaSqlServerQuery.ObterPorUsuario, p);
-        }
     }
+
+    public async Task<AuditoriaEntity> CriarAuditoriaAsync(AuditoriaEntity auditoria)
+    {
+      var p = new DynamicParameters();
+      p.Add("@IdUsuario", auditoria.IdUsuario);
+      p.Add("@Descricao", auditoria.Descricao);
+      p.Add("@Data", auditoria.Data);
+
+      var data = await ExecuteNonQueryAsync(AuditoriaSqlServerQuery.CriarAuditoria, p);
+      auditoria.IdAuditoria = data;
+      return auditoria;
+    }
+
+    public async Task<AuditoriaEntity> ConsultarAuditoriaAsync(int idAuditoria)
+    {
+      var p = new DynamicParameters();
+      p.Add("@IdAuditoria", idAuditoria);
+      var consulta = await QueryAsync<AuditoriaEntity>(AuditoriaSqlServerQuery.ConsultarIdAuditoria, p);
+
+      return consulta.FirstOrDefault();
+    }
+
+  }
+
 }
