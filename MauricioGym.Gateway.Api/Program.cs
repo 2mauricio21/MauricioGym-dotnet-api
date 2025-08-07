@@ -96,7 +96,7 @@ builder.Services.AddCors(options =>
 });
 
 // Configure URLs
-builder.WebHost.UseUrls("http://localhost:5000");
+builder.WebHost.UseUrls("http://localhost:8000");
 
 var app = builder.Build();
 
