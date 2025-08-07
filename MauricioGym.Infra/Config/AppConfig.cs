@@ -13,7 +13,7 @@ namespace MauricioGym.Infra.Config
         public static string AUDIENCE_JWT => "mauriciogym.app";
 
         public static string SqlServerConnectionString => GetConfiguration()["ConnectionStrings:DefaultConnection"] ?? 
-            "Server=localhost;Database=MauricioGym;Integrated Security=true;TrustServerCertificate=true;";
+            "Server=(localdb)\\mssqllocaldb;Database=MauricioGym;Trusted_Connection=True;";
 
         private static IConfiguration GetConfiguration()
         {
