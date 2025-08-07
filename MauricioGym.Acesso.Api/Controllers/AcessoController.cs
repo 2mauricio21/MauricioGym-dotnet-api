@@ -36,30 +36,30 @@ namespace MauricioGym.Acesso.Api.Controllers
             return Ok();
         }
 
-        [HttpDelete("{idAcesso}")]
-        public async Task<IActionResult> ExcluirAsync([FromRoute] int idAcesso)
+        [HttpPut("{idAcesso}/saida")]
+        public async Task<IActionResult> RegistrarSaidaAsync([FromRoute] int idAcesso)
         {
-            var excluir = await acessoService.ExcluirAcessoAsync(idAcesso, IdUsuario);
-            if (excluir.OcorreuErro)
-                return BadRequest(excluir.MensagemErro);
+            var registrarSaida = await acessoService.RegistrarSaidaAsync(idAcesso, IdUsuario);
+            if (registrarSaida.OcorreuErro)
+                return BadRequest(registrarSaida.MensagemErro);
 
             return Ok();
         }
 
         [HttpGet("{idAcesso}")]
-        public async Task<IActionResult> ConsultarAsync([FromRoute] int idAcesso)
+        public async Task<IActionResult> ConsultarAsync([FromRoute] int idAcesso, [FromQuery] int idAcademia)
         {
-            var consultar = await acessoService.ConsultarAcessoAsync(idAcesso);
+            var consultar = await acessoService.ConsultarAcessoAsync(idAcesso, idAcademia);
             if (consultar.OcorreuErro)
                 return BadRequest(consultar.MensagemErro);
 
             return Ok(consultar.Retorno);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> ListarAsync()
+        [HttpGet("academia/{idAcademia}")]
+        public async Task<IActionResult> ListarAsync([FromRoute] int idAcademia)
         {
-            var listar = await acessoService.ListarAcessoAsync();
+            var listar = await acessoService.ConsultarAcessosPorAcademiaAsync(idAcademia);
             if (listar.OcorreuErro)
                 return BadRequest(listar.MensagemErro);
 

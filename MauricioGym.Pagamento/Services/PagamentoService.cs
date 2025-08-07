@@ -43,12 +43,7 @@ namespace MauricioGym.Pagamento.Services
 
                 var result = await pagamentoSqlServerRepository.IncluirAsync(pagamento);
                 
-                var incluirAuditoria = await auditoriaService.IncluirAuditoriaAsync(new AuditoriaEntity
-                {
-                    IdUsuario = idUsuario,
-                    Data = DateTime.Now,
-                    Descricao = "O Pagamento foi cadastrado."
-                }, pagamento);
+                await auditoriaService.IncluirAuditoriaAsync(idUsuario, "O Pagamento foi cadastrado.", pagamento);
                 
                 return new ResultadoValidacao<PagamentoEntity>(result);
             }
@@ -79,7 +74,7 @@ namespace MauricioGym.Pagamento.Services
         {
             try
             {
-                var validacao = await Validator.ConsultarPagamentoPorTransacaoAsync(transacaoId);
+                var validacao = Validator.ConsultarPagamentoPorTransacao(transacaoId);
                 if (validacao.OcorreuErro)
                     return new ResultadoValidacao<PagamentoEntity>(validacao);
 
@@ -88,7 +83,6 @@ namespace MauricioGym.Pagamento.Services
             }
             catch (Exception ex)
             {
-                await RegistrarErroAsync("ConsultarPagamentoPorTransacao", ex, new { TransacaoId = transacaoId });
                 return new ResultadoValidacao<PagamentoEntity>(ex, "[PagamentoService]-Ocorreu erro ao tentar consultar o pagamento por transação.");
             }
         }
@@ -97,7 +91,7 @@ namespace MauricioGym.Pagamento.Services
         {
             try
             {
-                var validacao = await Validator.ConsultarPagamentosPorUsuarioAsync(idUsuario);
+                var validacao = Validator.ListarPorUsuario(idUsuario);
                 if (validacao.OcorreuErro)
                     return new ResultadoValidacao<IEnumerable<PagamentoEntity>>(validacao);
 
@@ -106,7 +100,6 @@ namespace MauricioGym.Pagamento.Services
             }
             catch (Exception ex)
             {
-                await RegistrarErroAsync("ConsultarPagamentosPorUsuario", ex, new { IdUsuario = idUsuario });
                 return new ResultadoValidacao<IEnumerable<PagamentoEntity>>(ex, "[PagamentoService]-Ocorreu erro ao tentar consultar pagamentos por usuário.");
             }
         }
@@ -115,7 +108,7 @@ namespace MauricioGym.Pagamento.Services
         {
             try
             {
-                var validacao = await Validator.ConsultarPagamentosPorUsuarioPlanoAsync(idUsuarioPlano);
+                var validacao = Validator.ListarPorUsuarioPlano(idUsuarioPlano, 0); // Need to adjust this based on actual requirements
                 if (validacao.OcorreuErro)
                     return new ResultadoValidacao<IEnumerable<PagamentoEntity>>(validacao);
 
@@ -124,7 +117,6 @@ namespace MauricioGym.Pagamento.Services
             }
             catch (Exception ex)
             {
-                await RegistrarErroAsync("ConsultarPagamentosPorUsuarioPlano", ex, new { IdUsuarioPlano = idUsuarioPlano });
                 return new ResultadoValidacao<IEnumerable<PagamentoEntity>>(ex, "[PagamentoService]-Ocorreu erro ao tentar consultar pagamentos por plano do usuário.");
             }
         }
@@ -135,16 +127,11 @@ namespace MauricioGym.Pagamento.Services
             {
                 var validacao = Validator.AlterarPagamento(pagamento);
                 if (validacao.OcorreuErro)
-                    return new ResultadoValidacao(validacao);
+                    return validacao;
 
-                await pagamentoSqlServerRepository.AlterarAsync(pagamento);
+                await pagamentoSqlServerRepository.AtualizarAsync(pagamento);
                 
-                var incluirAuditoria = await auditoriaService.IncluirAuditoriaAsync(new AuditoriaEntity
-                {
-                    IdUsuario = idUsuario,
-                    Data = DateTime.Now,
-                    Descricao = "O Pagamento foi alterado."
-                }, pagamento);
+                await auditoriaService.IncluirAuditoriaAsync(idUsuario, "O Pagamento foi alterado.", pagamento);
                 
                 return new ResultadoValidacao();
             }
@@ -160,21 +147,16 @@ namespace MauricioGym.Pagamento.Services
             {
                 var validacao = Validator.CancelarPagamento(idPagamento);
                 if (validacao.OcorreuErro)
-                    return new ResultadoValidacao(validacao);
+                    return validacao;
 
                 var pagamento = await pagamentoSqlServerRepository.ObterPorIdAsync(idPagamento);
                 if (pagamento == null)
                     return new ResultadoValidacao($"Pagamento com ID {idPagamento} não encontrado.");
 
                 pagamento.StatusPagamento = "Cancelado";
-                await pagamentoSqlServerRepository.AlterarAsync(pagamento);
+                await pagamentoSqlServerRepository.AtualizarAsync(pagamento);
                 
-                var incluirAuditoria = await auditoriaService.IncluirAuditoriaAsync(new AuditoriaEntity
-                {
-                    IdUsuario = idUsuario,
-                    Data = DateTime.Now,
-                    Descricao = "O Pagamento foi cancelado."
-                }, pagamento);
+                await auditoriaService.IncluirAuditoriaAsync(idUsuario, "O Pagamento foi cancelado.", pagamento);
                 
                 return new ResultadoValidacao();
             }
@@ -210,22 +192,7 @@ namespace MauricioGym.Pagamento.Services
             }
         }
 
-        public async Task<IResultadoValidacao<PagamentoEntity>> ConsultarPagamentoPorTransacaoAsync(string transacaoId)
-        {
-            try
-            {
-                var validacao = Validator.ConsultarPagamentoPorTransacao(transacaoId);
-                if (validacao.OcorreuErro)
-                    return new ResultadoValidacao<PagamentoEntity>(validacao);
 
-                var result = await pagamentoSqlServerRepository.ObterPorTransacaoAsync(transacaoId);
-                return new ResultadoValidacao<PagamentoEntity>(result);
-            }
-            catch (Exception ex)
-            {
-                return new ResultadoValidacao<PagamentoEntity>(ex, "[PagamentoService]-Ocorreu erro ao tentar consultar o pagamento por transação.");
-            }
-        }
 
         public async Task<IResultadoValidacao<IEnumerable<PagamentoEntity>>> ListarPorUsuarioAsync(int idUsuario)
         {
@@ -244,15 +211,15 @@ namespace MauricioGym.Pagamento.Services
             }
         }
 
-        public async Task<IResultadoValidacao<IEnumerable<PagamentoEntity>>> ListarPorUsuarioPlanoAsync(int idUsuario, int idPlano)
+        public async Task<IResultadoValidacao<IEnumerable<PagamentoEntity>>> ListarPorUsuarioPlanoAsync(int idUsuarioPlano)
         {
             try
             {
-                var validacao = Validator.ListarPorUsuarioPlano(idUsuario, idPlano);
+                var validacao = Validator.ListarPorUsuarioPlano(idUsuarioPlano, 0); // Adjust validation as needed
                 if (validacao.OcorreuErro)
                     return new ResultadoValidacao<IEnumerable<PagamentoEntity>>(validacao);
 
-                var result = await pagamentoSqlServerRepository.ListarPorUsuarioPlanoAsync(idUsuario, idPlano);
+                var result = await pagamentoSqlServerRepository.ListarPorUsuarioPlanoAsync(idUsuarioPlano);
                 return new ResultadoValidacao<IEnumerable<PagamentoEntity>>(result);
             }
             catch (Exception ex)

@@ -39,7 +39,7 @@ namespace MauricioGym.Pagamento.Api.Controllers
         [HttpDelete("{idPagamento}")]
         public async Task<IActionResult> ExcluirAsync([FromRoute] int idPagamento)
         {
-            var excluir = await pagamentoService.ExcluirPagamentoAsync(idPagamento, IdUsuario);
+            var excluir = await pagamentoService.CancelarPagamentoAsync(idPagamento, IdUsuario);
             if (excluir.OcorreuErro)
                 return BadRequest(excluir.MensagemErro);
 
@@ -59,7 +59,7 @@ namespace MauricioGym.Pagamento.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> ListarAsync()
         {
-            var listar = await pagamentoService.ListarPagamentoAsync();
+            var listar = await pagamentoService.ListarPagamentosAsync();
             if (listar.OcorreuErro)
                 return BadRequest(listar.MensagemErro);
 

@@ -1,11 +1,12 @@
 using System;
 using MauricioGym.Infra.Shared;
 using MauricioGym.Infra.Shared.Interfaces;
+using MauricioGym.Infra.Services.Validators;
 using MauricioGym.Pagamento.Entities;
 
 namespace MauricioGym.Pagamento.Services.Validators
 {
-    public class PagamentoValidator
+    public class PagamentoValidator : ValidatorService
     {
         public IResultadoValidacao IncluirPagamentoAsync(PagamentoEntity pagamento)
         {
@@ -21,8 +22,8 @@ namespace MauricioGym.Pagamento.Services.Validators
             if (pagamento.DataVencimento == default)
                 return new ResultadoValidacao("Data de vencimento é obrigatória.");
 
-            if (pagamento.IdFormaPagamento <= 0)
-                return new ResultadoValidacao("ID da forma de pagamento deve ser maior que zero.");
+            if (string.IsNullOrWhiteSpace(pagamento.FormaPagamento))
+                return new ResultadoValidacao("Forma de pagamento é obrigatória.");
 
             return new ResultadoValidacao();
         }
@@ -47,7 +48,7 @@ namespace MauricioGym.Pagamento.Services.Validators
             if (pagamento.DataVencimento == default)
                 return new ResultadoValidacao("A data de vencimento é obrigatória.");
 
-            if (pagamento.IdFormaPagamento <= 0)
+            if (string.IsNullOrWhiteSpace(pagamento.FormaPagamento))
                 return new ResultadoValidacao("A forma de pagamento é obrigatória.");
 
             return new ResultadoValidacao();

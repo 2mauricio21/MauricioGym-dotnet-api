@@ -29,7 +29,7 @@ namespace MauricioGym.Plano.Api.Controllers
         [HttpPut]
         public async Task<IActionResult> AlterarAsync(UsuarioPlanoEntity usuarioPlano)
         {
-            var alterar = await usuarioPlanoService.AlterarUsuarioPlanoAsync(usuarioPlano);
+            var alterar = await usuarioPlanoService.AlterarUsuarioPlanoAsync(usuarioPlano, IdUsuario);
             if (alterar.OcorreuErro)
                 return BadRequest(alterar.MensagemErro);
 
@@ -39,7 +39,7 @@ namespace MauricioGym.Plano.Api.Controllers
         [HttpDelete("{idUsuarioPlano}")]
         public async Task<IActionResult> ExcluirAsync([FromRoute] int idUsuarioPlano)
         {
-            var excluir = await usuarioPlanoService.CancelarUsuarioPlanoAsync(idUsuarioPlano);
+            var excluir = await usuarioPlanoService.CancelarUsuarioPlanoAsync(idUsuarioPlano, IdUsuario);
             if (excluir.OcorreuErro)
                 return BadRequest(excluir.MensagemErro);
 
@@ -59,7 +59,7 @@ namespace MauricioGym.Plano.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> ListarAsync()
         {
-            var listar = await usuarioPlanoService.ListarUsuarioPlanoAsync();
+            var listar = await usuarioPlanoService.ListarUsuariosPlanosAsync();
             if (listar.OcorreuErro)
                 return BadRequest(listar.MensagemErro);
 

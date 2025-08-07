@@ -29,7 +29,7 @@ namespace MauricioGym.Pagamento.Api.Controllers
         [HttpPut]
         public async Task<IActionResult> AlterarAsync(FormaPagamentoEntity formaPagamento)
         {
-            var alterar = await formaPagamentoService.AlterarFormaPagamentoAsync(formaPagamento);
+            var alterar = await formaPagamentoService.AlterarFormaPagamentoAsync(formaPagamento, IdUsuario);
             if (alterar.OcorreuErro)
                 return BadRequest(alterar.MensagemErro);
 
@@ -39,7 +39,7 @@ namespace MauricioGym.Pagamento.Api.Controllers
         [HttpDelete("{idFormaPagamento}")]
         public async Task<IActionResult> ExcluirAsync([FromRoute] int idFormaPagamento)
         {
-            var excluir = await formaPagamentoService.ExcluirFormaPagamentoAsync(idFormaPagamento);
+            var excluir = await formaPagamentoService.ExcluirFormaPagamentoAsync(idFormaPagamento, IdUsuario);
             if (excluir.OcorreuErro)
                 return BadRequest(excluir.MensagemErro);
 
@@ -59,7 +59,7 @@ namespace MauricioGym.Pagamento.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> ListarAsync()
         {
-            var listar = await formaPagamentoService.ListarFormaPagamentoAsync();
+            var listar = await formaPagamentoService.ListarFormasPagamentoAsync();
             if (listar.OcorreuErro)
                 return BadRequest(listar.MensagemErro);
 

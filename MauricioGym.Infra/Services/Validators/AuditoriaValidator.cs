@@ -1,34 +1,53 @@
+using System;
 using MauricioGym.Infra.Entities;
-using MauricioGym.Infra.Entities.Interfaces;
 using MauricioGym.Infra.Shared;
 using MauricioGym.Infra.Shared.Interfaces;
+using MauricioGym.Infra.Services.Validators;
 
 namespace MauricioGym.Infra.Services.Validators
 {
-  public class AuditoriaValidator : ValidatorService
-  {
-    public IResultadoValidacao IncluirAuditoria(AuditoriaEntity auditoria)
+    public class AuditoriaValidator : ValidatorService
     {
-      if (auditoria == null)
-        return new ResultadoValidacao("A auditoria não pode ser nula.");
+        public IResultadoValidacao ValidarIncluir(AuditoriaEntity auditoria)
+        {
+            var entityValidation = EntityIsNull(auditoria);
+            if (entityValidation.OcorreuErro)
+            {
+                return entityValidation;
+            }
 
-      if (string.IsNullOrEmpty(auditoria.Descricao))
-        return new ResultadoValidacao("A descrição da auditoria é obrigatória.");
+            if (auditoria.IdUsuario <= 0)
+            {
+                return new ResultadoValidacao("ID do usuário deve ser maior que zero.");
+            }
 
-      return new ResultadoValidacao();
+            if (string.IsNullOrWhiteSpace(auditoria.Descricao))
+            {
+                return new ResultadoValidacao("Descrição da auditoria é obrigatória.");
+            }
+            
+            if (auditoria.Descricao.Length > 500)
+            {
+                return new ResultadoValidacao("Descrição da auditoria não pode exceder 500 caracteres.");
+            }
+
+            if (auditoria.Data == default(DateTime))
+            {
+                return new ResultadoValidacao("Data da auditoria é obrigatória.");
+            }
+
+            return new ResultadoValidacao();
+        }
+
+        public IResultadoValidacao ValidarConsultar(int idAuditoria)
+        {
+            var idValidation = ValidarId(idAuditoria);
+            if (idValidation.OcorreuErro)
+            {
+                return idValidation;
+            }
+
+            return new ResultadoValidacao();
+        }
     }
-
-    // COnsultarAuditoriaPorId
-    public IResultadoValidacao ConsultarAuditoriaPorId(AuditoriaEntity auditoria)
-    {
-      if (auditoria == null)
-        return new ResultadoValidacao("A auditoria não pode ser nula.");
-
-      if (auditoria.IdAuditoria == 0)
-        return new ResultadoValidacao("O id da auditoria é obrigatório.");
-
-      return new ResultadoValidacao();
-    }
-  }
-
 }

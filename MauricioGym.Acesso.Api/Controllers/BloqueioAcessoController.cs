@@ -19,7 +19,7 @@ namespace MauricioGym.Acesso.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> IncluirAsync(BloqueioAcessoEntity bloqueioAcesso)
         {
-            var incluir = await bloqueioAcessoService.IncluirBloqueioAcessoAsync(bloqueioAcesso, IdUsuario);
+            var incluir = await bloqueioAcessoService.IncluirBloqueioAcessoAsync(bloqueioAcesso);
             if (incluir.OcorreuErro)
                 return BadRequest(incluir.MensagemErro);
 
@@ -59,7 +59,7 @@ namespace MauricioGym.Acesso.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> ListarAsync()
         {
-            var listar = await bloqueioAcessoService.ListarBloqueioAcessoAsync();
+            var listar = await bloqueioAcessoService.ListarBloqueiosAcessoAsync();
             if (listar.OcorreuErro)
                 return BadRequest(listar.MensagemErro);
 

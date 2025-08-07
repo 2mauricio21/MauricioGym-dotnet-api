@@ -1,12 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using MauricioGym.Academia.Services.Interfaces;
 using MauricioGym.Academia.Entities;
+using MauricioGym.Infra.Controller;
 
 namespace MauricioGym.Academia.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AcademiaController : ControllerBase
+    public class AcademiaController : ApiController
     {
         private readonly IAcademiaService _academiaService;
 
@@ -19,40 +20,40 @@ namespace MauricioGym.Academia.API.Controllers
         public async Task<IActionResult> GetAll()
         {
             var result = await _academiaService.ListarAcademiasAsync();
-            if (result.Sucesso)
-                return Ok(result.Dados);
+            if (result.OcorreuErro)
+                return BadRequest(result.MensagemErro);
             
-            return BadRequest(result.Erros);
+            return Ok(result.Retorno);
         }
 
         [HttpGet("ativas")]
         public async Task<IActionResult> GetAtivas()
         {
             var result = await _academiaService.ListarAcademiasAtivasAsync();
-            if (result.Sucesso)
-                return Ok(result.Dados);
+            if (result.OcorreuErro)
+                return BadRequest(result.MensagemErro);
             
-            return BadRequest(result.Erros);
+            return Ok(result.Retorno);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _academiaService.ConsultarAcademiaAsync(id);
-            if (result.Sucesso)
-                return Ok(result.Dados);
+            if (result.OcorreuErro)
+                return NotFound(result.MensagemErro);
             
-            return NotFound(result.Erros);
+            return Ok(result.Retorno);
         }
 
         [HttpGet("cnpj/{cnpj}")]
         public async Task<IActionResult> GetByCnpj(string cnpj)
         {
             var result = await _academiaService.ConsultarAcademiaPorCNPJAsync(cnpj);
-            if (result.Sucesso)
-                return Ok(result.Dados);
+            if (result.OcorreuErro)
+                return NotFound(result.MensagemErro);
             
-            return NotFound(result.Erros);
+            return Ok(result.Retorno);
         }
 
         [HttpPost]
@@ -61,11 +62,11 @@ namespace MauricioGym.Academia.API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var result = await _academiaService.IncluirAcademiaAsync(academia);
-            if (result.Sucesso)
-                return CreatedAtAction(nameof(GetById), new { id = result.Dados.IdAcademia }, result.Dados);
+            var result = await _academiaService.IncluirAcademiaAsync(academia, IdUsuario);
+            if (result.OcorreuErro)
+                return BadRequest(result.MensagemErro);
             
-            return BadRequest(result.Erros);
+            return CreatedAtAction(nameof(GetById), new { id = result.Retorno.IdAcademia }, result.Retorno);
         }
 
         [HttpPut("{id}")]
@@ -77,21 +78,21 @@ namespace MauricioGym.Academia.API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var result = await _academiaService.AlterarAcademiaAsync(academia);
-            if (result.Sucesso)
-                return NoContent();
+            var result = await _academiaService.AlterarAcademiaAsync(academia, IdUsuario);
+            if (result.OcorreuErro)
+                return BadRequest(result.MensagemErro);
             
-            return BadRequest(result.Erros);
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var result = await _academiaService.ExcluirAcademiaAsync(id);
-            if (result.Sucesso)
-                return NoContent();
+            var result = await _academiaService.ExcluirAcademiaAsync(id, IdUsuario);
+            if (result.OcorreuErro)
+                return BadRequest(result.MensagemErro);
             
-            return BadRequest(result.Erros);
+            return NoContent();
         }
     }
 }
