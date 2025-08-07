@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "MauricioGym.Acesso.Api": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:55630;http://localhost:55632"
+    }
+  }
+}
