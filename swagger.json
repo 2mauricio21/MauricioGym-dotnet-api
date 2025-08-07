@@ -1,0 +1,80 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "MauricioGym - API Gateway Unificada",
+    "description": "Gateway unificado para todas as APIs do sistema MauricioGym.\n        \n**Domínios Disponíveis:**\n- **Usuários** (/api/usuario): Gerenciamento de usuários, autenticação e perfis\n- **Academias** (/api/academia, /api/usuarioacademia): Gerenciamento de academias e associações\n- **Controle de Acesso** (/api/acesso, /api/bloqueio): Controle de entrada e bloqueios\n- **Pagamentos** (/api/pagamento, /api/formapagamento): Gestão financeira e formas de pagamento\n- **Planos** (/api/plano, /api/usuarioplano): Gerenciamento de planos e assinaturas\n        \n**Autenticação:** Utilize JWT Bearer Token para acessar endpoints protegidos.",
+    "contact": {
+      "name": "MauricioGym Team",
+      "email": "contato@mauriciogym.com"
+    },
+    "license": {
+      "name": "MIT License",
+      "url": "https://opensource.org/licenses/MIT"
+    },
+    "version": "v1"
+  },
+  "paths": {
+    "/api/gateway/info": {
+      "get": {
+        "tags": [
+          "🌐 Gateway"
+        ],
+        "summary": "Obtém informações sobre o Gateway e APIs disponíveis",
+        "responses": {
+          "200": {
+            "description": "Informações do Gateway"
+          }
+        }
+      }
+    },
+    "/api/gateway/health": {
+      "get": {
+        "tags": [
+          "🌐 Gateway"
+        ],
+        "summary": "Verifica o status de saúde do Gateway",
+        "responses": {
+          "200": {
+            "description": "Status de saúde"
+          }
+        }
+      }
+    },
+    "/api/gateway/protected": {
+      "get": {
+        "tags": [
+          "🌐 Gateway"
+        ],
+        "summary": "Endpoint protegido para teste de autenticação",
+        "responses": {
+          "200": {
+            "description": "Informações do usuário autenticado"
+          },
+          "401": {
+            "description": "Não autorizado"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "Bearer": {
+        "type": "apiKey",
+        "description": "JWT Authorization header usando o esquema Bearer.\n                      \nDigite 'Bearer' [espaço] e então seu token na caixa de texto abaixo.\n                      \nExemplo: 'Bearer 12345abcdef'",
+        "name": "Authorization",
+        "in": "header"
+      }
+    }
+  },
+  "security": [
+    {
+      "Bearer": [ ]
+    }
+  ]
+}
