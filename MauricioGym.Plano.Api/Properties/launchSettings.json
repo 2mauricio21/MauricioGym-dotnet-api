@@ -2,7 +2,7 @@
   "profiles": {
     "MauricioGym.Plano.Api": {
       "commandName": "Project",
-      "launchBrowser": true,
+      "launchBrowser": false,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
