@@ -1,6 +1,8 @@
 using MauricioGym.Infra;
 using MauricioGym.Usuario;
 using MauricioGym.Infra.Config;
+using MauricioGym.Infra.Services;
+using MauricioGym.Infra.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -43,6 +45,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 // Configure custom services
 builder.Services.ConfigureServicesInfra(builder.Configuration);
 builder.Services.ConfigureServicesCadastroUsuario(builder.Configuration);
+
+// Register JWT Service
+builder.Services.AddScoped<IJwtService, JwtService>();
 
 var app = builder.Build();
 

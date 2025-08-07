@@ -4,6 +4,7 @@ using Microsoft.OpenApi.Models;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using MauricioGym.Infra.Config;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,11 +21,7 @@ builder.Services.AddHttpClient<MauricioGym.Gateway.Api.Services.SwaggerAggregati
 // Register Swagger aggregation service
 builder.Services.AddScoped<MauricioGym.Gateway.Api.Services.SwaggerAggregationService>();
 
-// Configure JWT Authentication
-var jwtKey = builder.Configuration["Jwt:Key"] ?? "MauricioGym_SecretKey_2024_SuperSecure_Key_For_JWT_Authentication";
-var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "MauricioGym";
-var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "MauricioGym";
-
+// Configure JWT Authentication using AppConfig
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -34,9 +31,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtIssuer,
-            ValidAudience = jwtAudience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+            ValidIssuer = AppConfig.ISSUER_JWT,
+            ValidAudience = AppConfig.AUDIENCE_JWT,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(AppConfig.SECURITY_KEY_JWT))
         };
     });
 

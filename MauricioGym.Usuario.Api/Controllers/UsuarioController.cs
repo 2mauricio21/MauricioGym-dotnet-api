@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using MauricioGym.Infra.Shared.Interfaces;
 using MauricioGym.Usuario.Entities;
 using MauricioGym.Usuario.Services.Interfaces;
+using MauricioGym.Infra.Services.Interfaces;
+using MauricioGym.Infra.Entities;
 
 namespace MauricioGym.Usuario.API.Controllers
 {
@@ -14,10 +16,12 @@ namespace MauricioGym.Usuario.API.Controllers
     public class UsuarioController : ControllerBase
     {
         private readonly IUsuarioService _usuarioService;
+        private readonly IJwtService _jwtService;
 
-        public UsuarioController(IUsuarioService usuarioService)
+        public UsuarioController(IUsuarioService usuarioService, IJwtService jwtService)
         {
             _usuarioService = usuarioService;
+            _jwtService = jwtService;
         }
 
         /// <summary>
@@ -201,12 +205,12 @@ namespace MauricioGym.Usuario.API.Controllers
         /// Realiza login do usuário
         /// </summary>
         /// <param name="request">Dados de login (email e senha)</param>
-        /// <returns>Dados do usuário autenticado</returns>
+        /// <returns>Token JWT e dados do usuário autenticado</returns>
         /// <response code="200">Login realizado com sucesso</response>
         /// <response code="401">Credenciais inválidas</response>
         /// <response code="400">Erro na validação</response>
         [HttpPost("login")]
-        [ProducesResponseType(typeof(UsuarioEntity), 200)]
+        [ProducesResponseType(typeof(object), 200)]
         [ProducesResponseType(401)]
         [ProducesResponseType(typeof(object), 400)]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
@@ -217,10 +221,30 @@ namespace MauricioGym.Usuario.API.Controllers
                 return BadRequest(new { erro = resultado.MensagemErro });
 
             if (!resultado.Retorno)
-                return Unauthorized();
+                return Unauthorized(new { erro = "Credenciais inválidas" });
 
             var usuarioResultado = await _usuarioService.ConsultarUsuarioPorEmailAsync(request.Email);
-            return Ok(usuarioResultado.Retorno);
+            
+            if (usuarioResultado.OcorreuErro || usuarioResultado.Retorno == null)
+                return BadRequest(new { erro = "Erro ao buscar dados do usuário" });
+
+            // Converter UsuarioEntity para Usuario (Infra.Entities)
+            var usuario = new MauricioGym.Infra.Entities.Usuario
+            {
+                Id = usuarioResultado.Retorno.IdUsuario,
+                Nome = usuarioResultado.Retorno.Nome,
+                Email = usuarioResultado.Retorno.Email
+            };
+
+            var token = _jwtService.GenerateToken(usuario);
+            var expiresAt = _jwtService.GetTokenExpiration();
+
+            return Ok(new
+            {
+                token = token,
+                usuario = usuarioResultado.Retorno,
+                expiresAt = expiresAt
+            });
         }
     }
 
