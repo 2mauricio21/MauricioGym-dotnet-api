@@ -33,10 +33,9 @@ namespace MauricioGym.Pagamento.Services
             {
                 var validacao = Validator.IncluirFormaPagamentoAsync(formaPagamento);
                 if (validacao.OcorreuErro)
-                    return new ResultadoValidacao<FormaPagamentoEntity>(validacao);
+                    return new ResultadoValidacao<FormaPagamentoEntity>(validacao.MensagemErro);
 
                 formaPagamento.Ativo = true;
-                formaPagamento.. = DateTime.Now;
 
                 var result = await formaPagamentoSqlServerRepository.IncluirAsync(formaPagamento);
                 
@@ -86,9 +85,9 @@ namespace MauricioGym.Pagamento.Services
             {
                 var validacao = Validator.AlterarFormaPagamentoAsync(formaPagamento);
                 if (validacao.OcorreuErro)
-                    return new ResultadoValidacao(validacao);
+                    return new ResultadoValidacao(validacao.MensagemErro);
 
-                await formaPagamentoSqlServerRepository.AlterarAsync(formaPagamento);
+                await formaPagamentoSqlServerRepository.AtualizarAsync(formaPagamento);
                 
                 var incluirAuditoria = await auditoriaService.IncluirAuditoriaAsync(idUsuario, "A Forma de Pagamento foi alterada.");
                 
@@ -106,7 +105,7 @@ namespace MauricioGym.Pagamento.Services
             {
                 var validacao = Validator.ExcluirFormaPagamentoAsync(idFormaPagamento);
                 if (validacao.OcorreuErro)
-                    return new ResultadoValidacao(validacao);
+                    return new ResultadoValidacao(validacao.MensagemErro);
 
                 var formaPagamento = await formaPagamentoSqlServerRepository.ObterPorIdAsync(idFormaPagamento);
                 if (formaPagamento == null)
@@ -143,7 +142,7 @@ namespace MauricioGym.Pagamento.Services
             {
                 var validacao = Validator.ListarFormasPagamentoPorAcademiaAsync(idAcademia);
                 if (validacao.OcorreuErro)
-                    return new ResultadoValidacao<IEnumerable<FormaPagamentoEntity>>(validacao);
+                    return new ResultadoValidacao<IEnumerable<FormaPagamentoEntity>>(validacao.MensagemErro);
 
                 var result = await formaPagamentoSqlServerRepository.ListarPorAcademiaAsync(idAcademia);
                 return new ResultadoValidacao<IEnumerable<FormaPagamentoEntity>>(result);

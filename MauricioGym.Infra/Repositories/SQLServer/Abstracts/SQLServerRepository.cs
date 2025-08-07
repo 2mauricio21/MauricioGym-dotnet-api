@@ -181,6 +181,22 @@ namespace MauricioGym.Infra.Repositories.SQLServer.Abstracts
             return SQLServerConnection.QueryFirst<TEntity>(commandText, parameters, commandType: commandType);
         }
 
+        public async Task<TEntity> QueryFirstAsync<TEntity>(string commandText, object parameters = null, CommandType commandType = CommandType.Text)
+        {
+            if (SQLServerConnection.State == ConnectionState.Closed)
+                SQLServerConnection.Open();
+
+            return await SQLServerConnection.QueryFirstAsync<TEntity>(commandText, parameters, DbContext.Transaction, commandType: commandType);
+        }
+
+        public async Task<TEntity> QueryFirstOrDefaultAsync<TEntity>(string commandText, object parameters = null, CommandType commandType = CommandType.Text)
+        {
+            if (SQLServerConnection.State == ConnectionState.Closed)
+                SQLServerConnection.Open();
+
+            return await SQLServerConnection.QueryFirstOrDefaultAsync<TEntity>(commandText, parameters, DbContext.Transaction, commandType: commandType);
+        }
+
         public void Dispose()
         {
             SQLServerConnection.Close();

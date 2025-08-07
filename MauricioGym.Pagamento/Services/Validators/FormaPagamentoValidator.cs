@@ -1,11 +1,12 @@
 using System;
 using MauricioGym.Infra.Shared;
 using MauricioGym.Infra.Shared.Interfaces;
+using MauricioGym.Infra.Services.Validators;
 using MauricioGym.Pagamento.Entities;
 
 namespace MauricioGym.Pagamento.Services.Validators
 {
-    public class FormaPagamentoValidator
+    public class FormaPagamentoValidator : ValidatorService
     {
         public IResultadoValidacao IncluirFormaPagamentoAsync(FormaPagamentoEntity formaPagamento)
         {

@@ -2,7 +2,7 @@ using Dapper;
 using MauricioGym.Academia.Entities;
 using MauricioGym.Academia.Repositories.SqlServer.Interfaces;
 using MauricioGym.Academia.Repositories.SqlServer.Queries;
-using MauricioGym.Infra.Repositories;
+using MauricioGym.Infra.Repositories.SQLServer.Abstracts;
 using MauricioGym.Infra.SQLServer;
 
 namespace MauricioGym.Academia.Repositories.SqlServer

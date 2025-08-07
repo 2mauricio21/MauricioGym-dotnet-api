@@ -2,15 +2,25 @@ namespace MauricioGym.Infra.Repositories.SqlServer.Queries
 {
     public static class AuditoriaSqlServerQuery
     {
-        public static string ConsultarIdAuditoria => @"
+        public static string INSERT => @"
+            INSERT INTO Auditoria (IdUsuario, Descricao, Data)
+            OUTPUT INSERTED.IdAuditoria
+            VALUES (@IdUsuario, @Descricao, @Data)";
+
+        public static string SELECT_BY_ID => @"
             SELECT IdAuditoria, IdUsuario, Descricao, Data
-            FROM Auditorias 
+            FROM Auditoria
             WHERE IdAuditoria = @IdAuditoria";
 
-        public static string CriarAuditoria => @"
+        public static string SELECT_ALL => @"
+            SELECT IdAuditoria, IdUsuario, Descricao, Data
+            FROM Auditoria
+            ORDER BY Data DESC";
 
-            INSERT INTO Auditorias (IdUsuario, Descricao, Data)
-            VALUES (@IdUsuario, @Descricao, @Data);
-            SET @IdAuditoria = SCOPE_IDENTITY();";
+        public static string SELECT_BY_USUARIO => @"
+            SELECT IdAuditoria, IdUsuario, Descricao, Data
+            FROM Auditoria
+            WHERE IdUsuario = @IdUsuario
+            ORDER BY Data DESC";
     }
 }

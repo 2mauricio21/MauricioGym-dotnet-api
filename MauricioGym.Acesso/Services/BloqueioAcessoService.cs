@@ -28,7 +28,7 @@ namespace MauricioGym.Acesso.Services
         {
             try
             {
-                var validacao = await Validator.IncluirBloqueioAcessoAsync(bloqueioAcesso);
+                var validacao = Validator.IncluirBloqueioAcessoAsync(bloqueioAcesso);
                 if (validacao.OcorreuErro)
                     return new ResultadoValidacao<BloqueioAcessoEntity>(validacao);
 
@@ -37,7 +37,7 @@ namespace MauricioGym.Acesso.Services
 
                 var bloqueioIncluido = await bloqueioAcessoSqlServerRepository.IncluirBloqueioAcessoAsync(bloqueioAcesso);
 
-                await auditoriaService.IncluirAuditoriaAsync(idUsuario, $"Bloqueio de acesso incluído - ID: {bloqueioIncluido.IdBloqueioAcesso}");
+                await auditoriaService.IncluirAuditoriaAsync(bloqueioAcesso.IdUsuario, $"Bloqueio de acesso incluído - ID: {bloqueioIncluido.IdBloqueioAcesso}");
 
                 return new ResultadoValidacao<BloqueioAcessoEntity>(bloqueioIncluido);
             }
@@ -51,7 +51,7 @@ namespace MauricioGym.Acesso.Services
         {
             try
             {
-                var validacao = await Validator.ConsultarBloqueioAcessoAsync(idBloqueioAcesso);
+                var validacao = Validator.ConsultarBloqueioAcessoAsync(idBloqueioAcesso);
                 if (validacao.OcorreuErro)
                     return new ResultadoValidacao<BloqueioAcessoEntity>(validacao);
 
@@ -68,7 +68,7 @@ namespace MauricioGym.Acesso.Services
         {
             try
             {
-                var validacao = await Validator.ConsultarBloqueiosPorUsuarioAsync(idUsuario);
+                var validacao = Validator.ConsultarBloqueiosPorUsuarioAsync(idUsuario);
                 if (validacao.OcorreuErro)
                     return new ResultadoValidacao<IEnumerable<BloqueioAcessoEntity>>(validacao);
 
@@ -85,7 +85,7 @@ namespace MauricioGym.Acesso.Services
         {
             try
             {
-                var validacao = await Validator.ConsultarBloqueiosPorUsuarioAcademiaAsync(idUsuario, idAcademia);
+                var validacao = Validator.ConsultarBloqueiosPorUsuarioAcademiaAsync(idUsuario, idAcademia);
                 if (validacao.OcorreuErro)
                     return new ResultadoValidacao<IEnumerable<BloqueioAcessoEntity>>(validacao);
 
@@ -102,7 +102,7 @@ namespace MauricioGym.Acesso.Services
         {
             try
             {
-                var validacao = await Validator.ConsultarBloqueioAtivoPorUsuarioAcademiaAsync(idUsuario, idAcademia);
+                var validacao = Validator.ConsultarBloqueioAtivoPorUsuarioAcademiaAsync(idUsuario, idAcademia);
                 if (validacao.OcorreuErro)
                     return new ResultadoValidacao<BloqueioAcessoEntity>(validacao);
 
@@ -119,7 +119,7 @@ namespace MauricioGym.Acesso.Services
         {
             try
             {
-                var validacao = await Validator.AlterarBloqueioAcessoAsync(bloqueioAcesso);
+                var validacao = Validator.AlterarBloqueioAcessoAsync(bloqueioAcesso);
                 if (validacao.OcorreuErro)
                     return validacao;
 
@@ -143,7 +143,7 @@ namespace MauricioGym.Acesso.Services
         {
             try
             {
-                var validacao = await Validator.CancelarBloqueioAcessoAsync(idBloqueioAcesso);
+                var validacao = Validator.CancelarBloqueioAcessoAsync(idBloqueioAcesso);
                 if (validacao.OcorreuErro)
                     return validacao;
 
