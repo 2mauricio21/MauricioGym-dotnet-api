@@ -16,13 +16,16 @@ namespace MauricioGym.Usuario.Services
     {
         private readonly IUsuarioSqlServerRepository usuarioSqlServerRepository;
         private readonly IAuditoriaService auditoriaService;
+        private readonly IHashService hashService;
 
         public UsuarioService(
             IUsuarioSqlServerRepository usuarioRepository,
-            IAuditoriaService auditoriaService)
+            IAuditoriaService auditoriaService,
+            IHashService hashService)
         {
             usuarioSqlServerRepository = usuarioRepository ?? throw new ArgumentNullException(nameof(usuarioRepository));
             this.auditoriaService = auditoriaService ?? throw new ArgumentNullException(nameof(auditoriaService));
+            this.hashService = hashService ?? throw new ArgumentNullException(nameof(hashService));
         }
 
         public async Task<IResultadoValidacao<int>> IncluirUsuarioAsync(UsuarioEntity usuario)
@@ -142,8 +145,8 @@ namespace MauricioGym.Usuario.Services
             if (usuario == null || !usuario.Ativo)
                 return new ResultadoValidacao<bool>("Usuário não encontrado ou inativo.");
 
-            // Em produção, usar hash de senha
-            var senhaValida = usuario.Senha == senha;
+            // Verificar senha usando hash SHA256
+            var senhaValida = hashService.VerifyHash(senha, usuario.Senha);
             
             if (senhaValida)
             {
