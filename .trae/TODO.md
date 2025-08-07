@@ -1,7 +1,7 @@
 # TODO:
 
-- [x] check_database_exists: Verificar se o banco de dados MauricioGym foi criado e se o usuário admin existe (priority: High)
-- [x] fix_password_validation: Implementar hash SHA256 no método ValidarLoginAsync do UsuarioService (priority: High)
-- [x] test_correct_credentials: Testar login com email 'admin@mauriciogym.com' e senha 'admin123' (não 'Admin123') (priority: Medium)
-- [x] verify_api_running: Verificar se a API de usuário está rodando na porta 5001 (priority: Medium)
-- [x] test_jwt_generation: Confirmar que o token JWT está sendo gerado corretamente após login (priority: Low)
+- [x] analyze_swagger_config: Analisar a configuração atual do SwaggerAggregationService para entender como os endpoints estão sendo agregados (priority: High)
+- [x] fix_swagger_server_config: Modificar o SwaggerAggregationService para configurar o servidor base como localhost:8000 (Gateway) em vez das APIs individuais (priority: High)
+- [x] update_swagger_paths: Garantir que todos os paths no Swagger apontem para o Gateway e não para as APIs individuais (priority: High)
+- [x] test_swagger_gateway: Testar o endpoint /api/Usuario/login através do Swagger para confirmar que está passando pelo Gateway (priority: Medium)
+- [x] verify_all_endpoints: Verificar se todos os outros endpoints também estão funcionando corretamente através do Gateway (priority: Low)
