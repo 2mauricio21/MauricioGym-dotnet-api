@@ -152,10 +152,52 @@ Exemplo: 'Bearer 12345abcdef'",
                 {
                     foreach (var schema in apiDocument.Components.Schemas)
                     {
-                        var schemaKey = $"{apiName}_{schema.Key}";
-                        if (!mainDocument.Components.Schemas.ContainsKey(schemaKey))
+                        // Use original schema key to maintain references
+                        if (!mainDocument.Components.Schemas.ContainsKey(schema.Key))
                         {
-                            mainDocument.Components.Schemas[schemaKey] = schema.Value;
+                            mainDocument.Components.Schemas[schema.Key] = schema.Value;
+                        }
+                    }
+                }
+
+                // Merge other components
+                if (apiDocument.Components != null)
+                {
+                    // Merge SecuritySchemes
+                    if (apiDocument.Components.SecuritySchemes != null)
+                    {
+                        foreach (var securityScheme in apiDocument.Components.SecuritySchemes)
+                        {
+                            if (!mainDocument.Components.SecuritySchemes.ContainsKey(securityScheme.Key))
+                            {
+                                mainDocument.Components.SecuritySchemes[securityScheme.Key] = securityScheme.Value;
+                            }
+                        }
+                    }
+
+                    // Merge Parameters
+                    if (apiDocument.Components.Parameters != null)
+                    {
+                        mainDocument.Components.Parameters ??= new Dictionary<string, OpenApiParameter>();
+                        foreach (var parameter in apiDocument.Components.Parameters)
+                        {
+                            if (!mainDocument.Components.Parameters.ContainsKey(parameter.Key))
+                            {
+                                mainDocument.Components.Parameters[parameter.Key] = parameter.Value;
+                            }
+                        }
+                    }
+
+                    // Merge Responses
+                    if (apiDocument.Components.Responses != null)
+                    {
+                        mainDocument.Components.Responses ??= new Dictionary<string, OpenApiResponse>();
+                        foreach (var apiResponse in apiDocument.Components.Responses)
+                        {
+                            if (!mainDocument.Components.Responses.ContainsKey(apiResponse.Key))
+                            {
+                                mainDocument.Components.Responses[apiResponse.Key] = apiResponse.Value;
+                            }
                         }
                     }
                 }
