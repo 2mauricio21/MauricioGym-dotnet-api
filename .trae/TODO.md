@@ -1,6 +1,7 @@
 # TODO:
 
-- [x] analyze_jwt_configs: Analisar configurações JWT em todas as APIs para identificar inconsistências (priority: High)
-- [x] remove_gateway_jwt_config: Remover seção 'Jwt' duplicada do appsettings.json do Gateway (priority: High)
-- [x] verify_appconfig_usage: Verificar se todas as APIs estão usando AppConfig.cs consistentemente (priority: Medium)
-- [x] test_jwt_consistency: Testar se todas as APIs mantêm funcionamento correto após padronização (priority: Medium)
+- [x] check_database_exists: Verificar se o banco de dados MauricioGym foi criado e se o usuário admin existe (priority: High)
+- [x] fix_password_validation: Implementar hash SHA256 no método ValidarLoginAsync do UsuarioService (priority: High)
+- [x] test_correct_credentials: Testar login com email 'admin@mauriciogym.com' e senha 'admin123' (não 'Admin123') (priority: Medium)
+- [x] verify_api_running: Verificar se a API de usuário está rodando na porta 5001 (priority: Medium)
+- [x] test_jwt_generation: Confirmar que o token JWT está sendo gerado corretamente após login (priority: Low)
