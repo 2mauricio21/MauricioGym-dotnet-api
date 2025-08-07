@@ -47,6 +47,14 @@ public class SwaggerAggregationService
                     Url = new Uri("https://opensource.org/licenses/MIT")
                 }
             },
+            Servers = new List<OpenApiServer>
+            {
+                new OpenApiServer
+                {
+                    Url = "http://localhost:8000",
+                    Description = "Gateway de Desenvolvimento"
+                }
+            },
             Paths = new OpenApiPaths(),
             Components = new OpenApiComponents
             {
