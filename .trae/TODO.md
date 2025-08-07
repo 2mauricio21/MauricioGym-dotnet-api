@@ -1,5 +1,6 @@
 # TODO:
 
-- [x] update_appconfig_connection: Atualizar connection string no AppConfig.cs da infraestrutura para usar LocalDB com banco MauricioGym (priority: High)
-- [x] verify_connection_strings: Verificar se todas as connection strings foram atualizadas corretamente (priority: Medium)
-- [x] update_appsettings_files: Atualizar connection strings nos arquivos appsettings.json das APIs que ainda possuem configuração local (priority: Medium)
+- [x] analyze_jwt_configs: Analisar configurações JWT em todas as APIs para identificar inconsistências (priority: High)
+- [x] remove_gateway_jwt_config: Remover seção 'Jwt' duplicada do appsettings.json do Gateway (priority: High)
+- [x] verify_appconfig_usage: Verificar se todas as APIs estão usando AppConfig.cs consistentemente (priority: Medium)
+- [x] test_jwt_consistency: Testar se todas as APIs mantêm funcionamento correto após padronização (priority: Medium)
