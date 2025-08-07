@@ -67,24 +67,64 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.SetIsOriginAllowed(origin => true)
               .AllowAnyMethod()
               .AllowAnyHeader()
+              .AllowCredentials()
               .WithExposedHeaders("*");
+    });
+    
+    options.AddPolicy("Development", policy =>
+    {
+        policy.WithOrigins(
+                "http://localhost:8000",
+                "https://localhost:8000",
+                "https://localhost:8001",
+                "http://127.0.0.1:8000",
+                "https://127.0.0.1:8000",
+                "https://127.0.0.1:8001"
+              )
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials()
+              .WithExposedHeaders("Content-Type", "Content-Length", "Date", "Server", "Authorization", "Access-Control-Allow-Origin");
     });
     
     options.AddPolicy("SwaggerUI", policy =>
     {
-        policy.WithOrigins("http://localhost:8000")
+        policy.SetIsOriginAllowed(origin => 
+                origin.StartsWith("http://localhost") || 
+                origin.StartsWith("https://localhost") ||
+                origin.StartsWith("http://127.0.0.1") ||
+                origin.StartsWith("https://127.0.0.1")
+              )
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials()
-              .WithExposedHeaders("Content-Type", "Content-Length", "Date", "Server");
+              .WithExposedHeaders("*");
     });
 });
 
-// Configure URLs
-builder.WebHost.UseUrls("http://localhost:8000");
+// Configure URLs for both HTTP and HTTPS
+if (builder.Environment.IsDevelopment())
+{
+    // Configure HTTPS for development
+    builder.WebHost.UseUrls("http://localhost:8000", "https://localhost:8001");
+    
+    // Configure Kestrel for HTTPS development certificate
+    builder.WebHost.ConfigureKestrel(options =>
+    {
+        options.ListenLocalhost(8000); // HTTP
+        options.ListenLocalhost(8001, listenOptions =>
+        {
+            listenOptions.UseHttps(); // HTTPS with development certificate
+        });
+    });
+}
+else
+{
+    builder.WebHost.UseUrls("http://localhost:8000");
+}
 
 var app = builder.Build();
 
@@ -105,11 +145,13 @@ if (app.Environment.IsDevelopment())
         c.DisplayRequestDuration();
         c.DefaultModelRendering(Swashbuckle.AspNetCore.SwaggerUI.ModelRendering.Model);
         
-        // Custom configurations
+        // Custom configurations for external browser compatibility
         c.ConfigObject.AdditionalItems["showExtensions"] = true;
         c.ConfigObject.AdditionalItems["showCommonExtensions"] = true;
+        c.ConfigObject.AdditionalItems["supportedSubmitMethods"] = new[] { "get", "post", "put", "delete", "patch" };
+        c.ConfigObject.AdditionalItems["tryItOutEnabled"] = true;
         
-        // Custom styling
+        // Custom styling and scripts for external browsers
         c.HeadContent = @"
             <style>
                 .swagger-ui .topbar { background-color: #1976d2; }
@@ -119,21 +161,68 @@ if (app.Environment.IsDevelopment())
                 .swagger-ui .response .response-col_status { min-width: 100px; }
                 .swagger-ui .response .response-col_links { min-width: 100px; }
             </style>
+            <script>
+                // Fix for external browsers CORS issues
+                window.addEventListener('DOMContentLoaded', function() {
+                    console.log('Swagger UI loaded for external browser');
+                    
+                    // Override fetch to handle CORS properly
+                    const originalFetch = window.fetch;
+                    window.fetch = function(url, options = {}) {
+                        options.mode = 'cors';
+                        options.credentials = 'include';
+                        return originalFetch(url, options);
+                    };
+                });
+            </script>
         ";
     });
 }
 
 app.UseCors("AllowAll");
 
-// Add middleware to log requests and responses for debugging
+// Add middleware to handle CORS and security headers for external browsers
 app.Use(async (context, next) =>
 {
     var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
     
-    // Log request
-    logger.LogInformation("Request: {Method} {Path} from {UserAgent}", 
+    // Add security headers for all requests
+    context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+    context.Response.Headers["X-Frame-Options"] = "SAMEORIGIN";
+    context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+    
+    // Special handling for Swagger UI to work with external browsers
+    if (context.Request.Path.StartsWithSegments("/swagger"))
+    {
+        // Allow embedding in same origin for Swagger UI
+        context.Response.Headers["X-Frame-Options"] = "SAMEORIGIN";
+        
+        // Add Content Security Policy for Swagger UI
+        context.Response.Headers["Content-Security-Policy"] = 
+            "default-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
+            "style-src 'self' 'unsafe-inline'; " +
+            "img-src 'self' data:; " +
+            "font-src 'self' data:; " +
+            "connect-src 'self' http://localhost:* https://localhost:*;";
+    }
+    
+    // Handle preflight requests for CORS
+    if (context.Request.Method == "OPTIONS")
+    {
+        context.Response.Headers["Access-Control-Allow-Origin"] = "*";
+        context.Response.Headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS";
+        context.Response.Headers["Access-Control-Allow-Headers"] = "*";
+        context.Response.Headers["Access-Control-Max-Age"] = "86400";
+        context.Response.StatusCode = 200;
+        return;
+    }
+    
+    // Log request with origin
+    logger.LogInformation("Request: {Method} {Path} from {Origin} - {UserAgent}", 
         context.Request.Method, 
-        context.Request.Path, 
+        context.Request.Path,
+        context.Request.Headers.Origin.ToString(),
         context.Request.Headers.UserAgent.ToString());
     
     // Capture response
@@ -143,11 +232,11 @@ app.Use(async (context, next) =>
     
     await next();
     
-    // Log response
-    logger.LogInformation("Response: {StatusCode} {ContentType} {ContentLength}bytes", 
+    // Log response with CORS headers
+    logger.LogInformation("Response: {StatusCode} {ContentType} CORS: {AccessControlAllowOrigin}", 
         context.Response.StatusCode,
         context.Response.ContentType,
-        context.Response.ContentLength ?? responseBody.Length);
+        context.Response.Headers.AccessControlAllowOrigin.ToString());
     
     // Copy response back
     responseBody.Seek(0, SeekOrigin.Begin);

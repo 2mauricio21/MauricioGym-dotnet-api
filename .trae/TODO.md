@@ -1,5 +1,7 @@
 # TODO:
 
-- [x] create_swagger_endpoint: Criar endpoint /swagger/v1/swagger.json que usa SwaggerAggregationService para retornar documentação agregada (priority: High)
-- [x] fix_requestinterceptor_error: Corrigir erro 'r.requestInterceptor is not a function' removendo configurações problemáticas do Swagger UI (priority: High)
-- [x] test_swagger_loading: Testar se o Swagger UI carrega corretamente a definição da API (priority: Medium)
+- [x] configure_https_dev: Configurar HTTPS para desenvolvimento local no Gateway (priority: High)
+- [x] add_security_headers: Adicionar headers de segurança específicos para navegadores externos (priority: High)
+- [x] implement_https_middleware: Implementar middleware que force HTTPS ou configure adequadamente HTTP (priority: Medium)
+- [x] configure_swagger_external: Configurar Swagger UI para funcionar em navegadores externos (priority: Medium)
+- [x] test_external_browsers: Testar funcionamento em Chrome e Firefox externos (priority: Low)
