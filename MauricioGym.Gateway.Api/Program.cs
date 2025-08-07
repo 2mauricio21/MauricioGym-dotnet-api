@@ -69,7 +69,17 @@ builder.Services.AddCors(options =>
     {
         policy.AllowAnyOrigin()
               .AllowAnyMethod()
-              .AllowAnyHeader();
+              .AllowAnyHeader()
+              .WithExposedHeaders("*");
+    });
+    
+    options.AddPolicy("SwaggerUI", policy =>
+    {
+        policy.WithOrigins("http://localhost:8000")
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials()
+              .WithExposedHeaders("Content-Type", "Content-Length", "Date", "Server");
     });
 });
 
@@ -95,19 +105,55 @@ if (app.Environment.IsDevelopment())
         c.DisplayRequestDuration();
         c.DefaultModelRendering(Swashbuckle.AspNetCore.SwaggerUI.ModelRendering.Model);
         
-        // Custom header
+        // Custom configurations
+        c.ConfigObject.AdditionalItems["showExtensions"] = true;
+        c.ConfigObject.AdditionalItems["showCommonExtensions"] = true;
+        
+        // Custom styling
         c.HeadContent = @"
             <style>
                 .swagger-ui .topbar { background-color: #1976d2; }
                 .swagger-ui .topbar .download-url-wrapper { display: none; }
                 .swagger-ui .info .title { color: #1976d2; }
                 .swagger-ui .scheme-container { background: #f8f9fa; padding: 10px; border-radius: 4px; }
+                .swagger-ui .response .response-col_status { min-width: 100px; }
+                .swagger-ui .response .response-col_links { min-width: 100px; }
             </style>
         ";
     });
 }
 
 app.UseCors("AllowAll");
+
+// Add middleware to log requests and responses for debugging
+app.Use(async (context, next) =>
+{
+    var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+    
+    // Log request
+    logger.LogInformation("Request: {Method} {Path} from {UserAgent}", 
+        context.Request.Method, 
+        context.Request.Path, 
+        context.Request.Headers.UserAgent.ToString());
+    
+    // Capture response
+    var originalBodyStream = context.Response.Body;
+    using var responseBody = new MemoryStream();
+    context.Response.Body = responseBody;
+    
+    await next();
+    
+    // Log response
+    logger.LogInformation("Response: {StatusCode} {ContentType} {ContentLength}bytes", 
+        context.Response.StatusCode,
+        context.Response.ContentType,
+        context.Response.ContentLength ?? responseBody.Length);
+    
+    // Copy response back
+    responseBody.Seek(0, SeekOrigin.Begin);
+    await responseBody.CopyToAsync(originalBodyStream);
+});
+
 app.UseAuthentication();
 app.UseAuthorization();
 
