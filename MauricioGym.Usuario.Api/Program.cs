@@ -1,8 +1,6 @@
+using MauricioGym.Infra;
+using MauricioGym.Usuario;
 using MauricioGym.Infra.Config;
-using MauricioGym.Usuario.Repositories.SqlServer;
-using MauricioGym.Usuario.Repositories.SqlServer.Interfaces;
-using MauricioGym.Usuario.Services;
-using MauricioGym.Usuario.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -40,13 +38,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// Register Repositories
-builder.Services.AddScoped<IUsuarioSqlServerRepository, UsuarioSqlServerRepository>();
-builder.Services.AddScoped<IRecursoSqlServerRepository, RecursoSqlServerRepository>();
-
-// Register Services
-builder.Services.AddScoped<IUsuarioService, UsuarioService>();
-builder.Services.AddScoped<IRecursoService, RecursoService>();
+// Configure custom services
+builder.Services.ConfigureServicesInfra(builder.Configuration);
+builder.Services.ConfigureServicesCadastroUsuario(builder.Configuration);
 
 var app = builder.Build();
 
