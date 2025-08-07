@@ -5,6 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>academia-api-secrets</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

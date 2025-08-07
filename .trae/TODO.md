@@ -1,7 +1,7 @@
 # TODO:
 
-- [x] investigate_dbcontext_error: Investigar o erro de SQLServerDbContext não registrado no DI container (priority: High)
-- [x] check_infra_services: Verificar se o SQLServerDbContext está implementado no projeto Infra (priority: High)
-- [x] check_api_program_files: Verificar configuração dos serviços nos arquivos Program.cs das APIs (priority: High)
-- [x] fix_di_registration: Corrigir o registro do SQLServerDbContext no container de DI (priority: High)
-- [x] test_api_startup: Testar inicialização das APIs após correção (priority: Medium)
+- [x] create_gateway_project: Criar projeto MauricioGym.Gateway.Api para API Gateway unificada (priority: High)
+- [x] setup_reverse_proxy: Configurar proxy reverso para rotear requisições para APIs específicas (priority: High)
+- [x] configure_gateway_swagger: Configurar Swagger unificado no Gateway agregando todas as APIs (priority: High)
+- [x] test_unified_swagger: Testar interface Swagger unificada com todos os endpoints (priority: Medium)
+- [x] update_solution_file: Adicionar projeto Gateway ao arquivo .sln (priority: Medium)
