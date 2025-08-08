@@ -64,8 +64,6 @@ if (app.Environment.IsDevelopment())
     // Note: SwaggerUI is intentionally not configured to avoid auto-opening browser
 }
 
-app.UseHttpsRedirection();
-
 app.UseCors("AllowAll");
 
 app.UseAuthentication();
