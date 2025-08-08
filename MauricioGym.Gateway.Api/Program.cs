@@ -18,6 +18,12 @@ builder.Services.AddHttpClient<MauricioGym.Gateway.Api.Services.SwaggerAggregati
     client.Timeout = TimeSpan.FromSeconds(30);
 });
 
+// Add HttpClient for Health checks
+builder.Services.AddHttpClient<MauricioGym.Gateway.Api.Controllers.HealthController>(client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(10);
+});
+
 // Register Swagger aggregation service
 builder.Services.AddScoped<MauricioGym.Gateway.Api.Services.SwaggerAggregationService>();
 
