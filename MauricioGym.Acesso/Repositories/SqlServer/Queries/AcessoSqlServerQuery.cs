@@ -4,67 +4,68 @@ namespace MauricioGym.Acesso.Repositories.SqlServer.Queries
     {
         public static string IncluirAcesso => @"
             INSERT INTO Acessos (
-                IdUsuarioAcademia, IdUsuario, IdAcademia, DataEntrada, DataSaida,
-                StatusAcesso, Observacao
+                IdUsuario, IdAcademia, DataHoraEntrada, DataHoraSaida,
+                TipoAcesso, ObservacaoAcesso, AcessoLiberado, MotivoNegacao
             ) VALUES (
-                @IdUsuarioAcademia, @IdUsuario, @IdAcademia, @DataEntrada, @DataSaida,
-                @StatusAcesso, @Observacao
+                @IdUsuario, @IdAcademia, @DataHoraEntrada, @DataHoraSaida,
+                @TipoAcesso, @ObservacaoAcesso, @AcessoLiberado, @MotivoNegacao
             );
             SELECT CAST(SCOPE_IDENTITY() as int)";
 
         public static string ConsultarAcesso => @"
             SELECT 
-                IdAcesso, IdUsuarioAcademia, IdUsuario, IdAcademia, DataEntrada,
-                DataSaida, StatusAcesso, Observacao
+                IdAcesso, IdUsuario, IdAcademia, DataHoraEntrada,
+                DataHoraSaida, TipoAcesso, ObservacaoAcesso, AcessoLiberado, MotivoNegacao
             FROM Acessos
             WHERE IdAcesso = @IdAcesso";
 
         public static string ConsultarAcessosPorUsuario => @"
             SELECT 
-                IdAcesso, IdUsuarioAcademia, IdUsuario, IdAcademia, DataEntrada,
-                DataSaida, StatusAcesso, Observacao
+                IdAcesso, IdUsuario, IdAcademia, DataHoraEntrada,
+                DataHoraSaida, TipoAcesso, ObservacaoAcesso, AcessoLiberado, MotivoNegacao
             FROM Acessos
             WHERE IdUsuario = @IdUsuario
-            ORDER BY DataEntrada DESC";
+            ORDER BY DataHoraEntrada DESC";
 
         public static string ConsultarAcessosPorAcademia => @"
             SELECT 
-                IdAcesso, IdUsuarioAcademia, IdUsuario, IdAcademia, DataEntrada,
-                DataSaida, StatusAcesso, Observacao
+                IdAcesso, IdUsuario, IdAcademia, DataHoraEntrada,
+                DataHoraSaida, TipoAcesso, ObservacaoAcesso, AcessoLiberado, MotivoNegacao
             FROM Acessos
             WHERE IdAcademia = @IdAcademia
-            ORDER BY DataEntrada DESC";
+            ORDER BY DataHoraEntrada DESC";
 
         public static string ConsultarAcessosAtivosPorAcademia => @"
             SELECT 
-                IdAcesso, IdUsuarioAcademia, IdUsuario, IdAcademia, DataEntrada,
-                DataSaida, StatusAcesso, Observacao
+                IdAcesso, IdUsuario, IdAcademia, DataHoraEntrada,
+                DataHoraSaida, TipoAcesso, ObservacaoAcesso, AcessoLiberado, MotivoNegacao
             FROM Acessos
-            WHERE IdAcademia = @IdAcademia AND StatusAcesso = 'Ativo'
-            ORDER BY DataEntrada DESC";
+            WHERE IdAcademia = @IdAcademia AND TipoAcesso = 'Ativo'
+            ORDER BY DataHoraEntrada DESC";
 
         public static string AlterarAcesso => @"
             UPDATE Acessos SET
-                IdUsuarioAcademia = @IdUsuarioAcademia,
                 IdUsuario = @IdUsuario,
                 IdAcademia = @IdAcademia,
-                DataEntrada = @DataEntrada,
-                DataSaida = @DataSaida,
-                StatusAcesso = @StatusAcesso,
-                Observacao = @Observacao
+                DataHoraEntrada = @DataHoraEntrada,
+                DataHoraSaida = @DataHoraSaida,
+                TipoAcesso = @TipoAcesso,
+                ObservacaoAcesso = @ObservacaoAcesso,
+                AcessoLiberado = @AcessoLiberado,
+                MotivoNegacao = @MotivoNegacao
             WHERE IdAcesso = @IdAcesso";
 
         public static string RegistrarSaida => @"
             UPDATE Acessos SET
-                DataSaida = @DataSaida,
-                StatusAcesso = 'Finalizado'
+                DataHoraSaida = @DataHoraSaida,
+                TipoAcesso = 'Finalizado'
             WHERE IdAcesso = @IdAcesso";
 
         public static string ListarAcessos => @"
             SELECT 
-                IdAcesso, IdUsuarioAcademia, IdUsuario, IdAcademia, DataEntrada,
-                DataSaida, StatusAcesso, Observacao
+                IdAcesso, IdUsuario, IdAcademia, DataHoraEntrada,
+                DataHoraSaida, TipoAcesso, ObservacaoAcesso, AcessoLiberado, MotivoNegacao
             FROM Acessos
-            ORDER BY DataEntrada DESC";
+            ORDER BY DataHoraEntrada DESC";
     }
 }

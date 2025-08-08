@@ -4,51 +4,53 @@ namespace MauricioGym.Acesso.Repositories.SqlServer.Queries
     {
         public static string IncluirBloqueioAcesso => @"
             INSERT INTO BloqueiosAcesso (
-                IdUsuario, IdAcademia, Motivo, DataInicio, DataFim, Ativo
+                IdUsuario, IdAcademia, MotivoBloqueio, DataInicioBloqueio, DataFimBloqueio, ObservacaoBloqueio, Ativo, IdUsuarioResponsavel
             ) VALUES (
-                @IdUsuario, @IdAcademia, @Motivo, @DataInicio, @DataFim, @Ativo
+                @IdUsuario, @IdAcademia, @MotivoBloqueio, @DataInicioBloqueio, @DataFimBloqueio, @ObservacaoBloqueio, @Ativo, @IdUsuarioResponsavel
             );
             SELECT CAST(SCOPE_IDENTITY() as int)";
 
         public static string ConsultarBloqueioAcesso => @"
             SELECT 
-                IdBloqueioAcesso, IdUsuario, IdAcademia, Motivo, DataInicio,
-                DataFim, Ativo
+                IdBloqueioAcesso, IdUsuario, IdAcademia, MotivoBloqueio, DataInicioBloqueio,
+                DataFimBloqueio, ObservacaoBloqueio, Ativo, IdUsuarioResponsavel
             FROM BloqueiosAcesso
             WHERE IdBloqueioAcesso = @IdBloqueioAcesso";
 
         public static string ConsultarBloqueiosPorUsuario => @"
             SELECT 
-                IdBloqueioAcesso, IdUsuario, IdAcademia, Motivo, DataInicio,
-                DataFim, Ativo
+                IdBloqueioAcesso, IdUsuario, IdAcademia, MotivoBloqueio, DataInicioBloqueio,
+                DataFimBloqueio, ObservacaoBloqueio, Ativo, IdUsuarioResponsavel
             FROM BloqueiosAcesso
             WHERE IdUsuario = @IdUsuario
-            ORDER BY DataInicio DESC";
+            ORDER BY DataInicioBloqueio DESC";
 
         public static string ConsultarBloqueiosPorUsuarioAcademia => @"
             SELECT 
-                IdBloqueioAcesso, IdUsuario, IdAcademia, Motivo, DataInicio,
-                DataFim, Ativo
+                IdBloqueioAcesso, IdUsuario, IdAcademia, MotivoBloqueio, DataInicioBloqueio,
+                DataFimBloqueio, ObservacaoBloqueio, Ativo, IdUsuarioResponsavel
             FROM BloqueiosAcesso
             WHERE IdUsuario = @IdUsuario AND IdAcademia = @IdAcademia
-            ORDER BY DataInicio DESC";
+            ORDER BY DataInicioBloqueio DESC";
 
         public static string ConsultarBloqueioAtivoPorUsuarioAcademia => @"
             SELECT 
-                IdBloqueioAcesso, IdUsuario, IdAcademia, Motivo, DataInicio,
-                DataFim, Ativo
+                IdBloqueioAcesso, IdUsuario, IdAcademia, MotivoBloqueio, DataInicioBloqueio,
+                DataFimBloqueio, ObservacaoBloqueio, Ativo, IdUsuarioResponsavel
             FROM BloqueiosAcesso
             WHERE IdUsuario = @IdUsuario AND IdAcademia = @IdAcademia 
-                AND Ativo = 1 AND GETDATE() BETWEEN DataInicio AND ISNULL(DataFim, DATEADD(YEAR, 100, GETDATE()))";
+                AND Ativo = 1 AND GETDATE() BETWEEN DataInicioBloqueio AND ISNULL(DataFimBloqueio, DATEADD(YEAR, 100, GETDATE()))";
 
         public static string AlterarBloqueioAcesso => @"
             UPDATE BloqueiosAcesso SET
                 IdUsuario = @IdUsuario,
                 IdAcademia = @IdAcademia,
-                Motivo = @Motivo,
-                DataInicio = @DataInicio,
-                DataFim = @DataFim,
-                Ativo = @Ativo
+                MotivoBloqueio = @MotivoBloqueio,
+                DataInicioBloqueio = @DataInicioBloqueio,
+                DataFimBloqueio = @DataFimBloqueio,
+                ObservacaoBloqueio = @ObservacaoBloqueio,
+                Ativo = @Ativo,
+                IdUsuarioResponsavel = @IdUsuarioResponsavel
             WHERE IdBloqueioAcesso = @IdBloqueioAcesso";
 
         public static string CancelarBloqueioAcesso => @"
@@ -56,17 +58,17 @@ namespace MauricioGym.Acesso.Repositories.SqlServer.Queries
 
         public static string ListarBloqueiosAcesso => @"
             SELECT 
-                IdBloqueioAcesso, IdUsuario, IdAcademia, Motivo, DataInicio,
-                DataFim, Ativo
+                IdBloqueioAcesso, IdUsuario, IdAcademia, MotivoBloqueio, DataInicioBloqueio,
+                DataFimBloqueio, ObservacaoBloqueio, Ativo, IdUsuarioResponsavel
             FROM BloqueiosAcesso
-            ORDER BY DataInicio DESC";
+            ORDER BY DataInicioBloqueio DESC";
 
         public static string ListarBloqueiosAtivos => @"
             SELECT 
-                IdBloqueioAcesso, IdUsuario, IdAcademia, Motivo, DataInicio,
-                DataFim, Ativo
+                IdBloqueioAcesso, IdUsuario, IdAcademia, MotivoBloqueio, DataInicioBloqueio,
+                DataFimBloqueio, ObservacaoBloqueio, Ativo, IdUsuarioResponsavel
             FROM BloqueiosAcesso
-            WHERE Ativo = 1 AND (DataFim IS NULL OR DataFim > GETDATE())
-            ORDER BY DataInicio DESC";
+            WHERE Ativo = 1 AND (DataFimBloqueio IS NULL OR DataFimBloqueio > GETDATE())
+            ORDER BY DataInicioBloqueio DESC";
     }
 }
