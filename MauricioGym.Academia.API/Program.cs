@@ -17,11 +17,22 @@ builder.Services.AddSwaggerGen();
 // Add CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll",
-        builder => builder
-            .AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader());
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.WithOrigins(
+                "http://localhost:8000",
+                "https://localhost:8001",
+                "http://localhost:5002",
+                "https://localhost:7002",
+                "http://127.0.0.1:8000",
+                "https://127.0.0.1:8001",
+                "http://127.0.0.1:5002",
+                "https://127.0.0.1:7002"
+              )
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
+    });
 });
 
 // Add Authentication
