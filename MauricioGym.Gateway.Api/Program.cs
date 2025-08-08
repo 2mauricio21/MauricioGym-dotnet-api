@@ -88,7 +88,11 @@ builder.Services.AddCors(options =>
                 "https://localhost:8001",
                 "http://127.0.0.1:8000",
                 "https://127.0.0.1:8000",
-                "https://127.0.0.1:8001"
+                "https://127.0.0.1:8001",
+                "http://192.168.1.1:8000",
+                "https://192.168.1.1:8001",
+                "http://10.0.0.1:8000",
+                "https://10.0.0.1:8001"
               )
               .AllowAnyMethod()
               .AllowAnyHeader()
@@ -102,7 +106,13 @@ builder.Services.AddCors(options =>
                 origin.StartsWith("http://localhost") || 
                 origin.StartsWith("https://localhost") ||
                 origin.StartsWith("http://127.0.0.1") ||
-                origin.StartsWith("https://127.0.0.1")
+                origin.StartsWith("https://127.0.0.1") ||
+                origin.StartsWith("http://192.168.") ||
+                origin.StartsWith("https://192.168.") ||
+                origin.StartsWith("http://10.") ||
+                origin.StartsWith("https://10.") ||
+                origin.StartsWith("http://172.") ||
+                origin.StartsWith("https://172.")
               )
               .AllowAnyMethod()
               .AllowAnyHeader()
@@ -111,17 +121,17 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Configure URLs for both HTTP and HTTPS
+// Configure URLs - Both HTTP and HTTPS for flexibility
 if (builder.Environment.IsDevelopment())
 {
-    // Configure HTTPS for development
-    builder.WebHost.UseUrls("http://localhost:8000", "https://localhost:8001");
+    // Support both HTTP and HTTPS for development
+    builder.WebHost.UseUrls("http://*:8000", "https://*:8001");
     
-    // Configure Kestrel for HTTPS development certificate
+    // Configure Kestrel for both protocols
     builder.WebHost.ConfigureKestrel(options =>
     {
-        options.ListenLocalhost(8000); // HTTP
-        options.ListenLocalhost(8001, listenOptions =>
+        options.ListenAnyIP(8000); // HTTP - Accept from any IP
+        options.ListenAnyIP(8001, listenOptions =>
         {
             listenOptions.UseHttps(); // HTTPS with development certificate
         });
@@ -129,7 +139,7 @@ if (builder.Environment.IsDevelopment())
 }
 else
 {
-    builder.WebHost.UseUrls("http://localhost:8000");
+    builder.WebHost.UseUrls("http://*:8000", "https://*:8001");
 }
 
 var app = builder.Build();
@@ -157,7 +167,7 @@ if (app.Environment.IsDevelopment())
         c.ConfigObject.AdditionalItems["supportedSubmitMethods"] = new[] { "get", "post", "put", "delete", "patch" };
         c.ConfigObject.AdditionalItems["tryItOutEnabled"] = true;
         
-        // Custom styling and scripts for external browsers
+        // Custom styling and scripts for external browsers - Support both HTTP and HTTPS
         c.HeadContent = @"
             <style>
                 .swagger-ui .topbar { background-color: #1976d2; }
@@ -168,16 +178,60 @@ if (app.Environment.IsDevelopment())
                 .swagger-ui .response .response-col_links { min-width: 100px; }
             </style>
             <script>
-                // Fix for external browsers CORS issues
+                // Fix for external browsers - Support both HTTP and HTTPS with fallback
                 window.addEventListener('DOMContentLoaded', function() {
-                    console.log('Swagger UI loaded for external browser');
+                    console.log('Swagger UI loaded for external browser - HTTP/HTTPS mode');
                     
-                    // Override fetch to handle CORS properly
+                    // Override fetch to handle CORS properly and fallback to HTTP if HTTPS fails
                     const originalFetch = window.fetch;
                     window.fetch = function(url, options = {}) {
                         options.mode = 'cors';
                         options.credentials = 'include';
-                        return originalFetch(url, options);
+                        
+                        console.log('Making request to:', url, 'with options:', options);
+                        
+                        return originalFetch(url, options).catch(error => {
+                            console.warn('Request failed, trying HTTP fallback:', error);
+                            // If HTTPS fails, try HTTP as fallback
+                            if (url.startsWith('https://')) {
+                                const httpUrl = url.replace('https://', 'http://').replace(':8001', ':8000');
+                                console.log('Falling back to HTTP:', httpUrl);
+                                return originalFetch(httpUrl, options);
+                            }
+                            throw error;
+                        });
+                    };
+                    
+                    // Override XMLHttpRequest as fallback with HTTP/HTTPS support
+                    const originalXHR = window.XMLHttpRequest;
+                    window.XMLHttpRequest = function() {
+                        const xhr = new originalXHR();
+                        const originalOpen = xhr.open;
+                        const originalSend = xhr.send;
+                        
+                        xhr.open = function(method, url, ...args) {
+                            this._originalUrl = url;
+                            return originalOpen.call(this, method, url, ...args);
+                        };
+                        
+                        xhr.send = function(data) {
+                            const originalOnError = this.onerror;
+                            this.onerror = function(e) {
+                                console.warn('XHR failed, trying HTTP fallback');
+                                if (this._originalUrl && this._originalUrl.startsWith('https://')) {
+                                    const httpUrl = this._originalUrl.replace('https://', 'http://').replace(':8001', ':8000');
+                                    console.log('XHR: Falling back to HTTP:', httpUrl);
+                                    const newXhr = new originalXHR();
+                                    newXhr.open(this._method || 'GET', httpUrl, true);
+                                    newXhr.send(data);
+                                    return;
+                                }
+                                if (originalOnError) originalOnError.call(this, e);
+                            };
+                            return originalSend.call(this, data);
+                        };
+                        
+                        return xhr;
                     };
                 });
             </script>
@@ -203,25 +257,37 @@ app.Use(async (context, next) =>
         // Allow embedding in same origin for Swagger UI
         context.Response.Headers["X-Frame-Options"] = "SAMEORIGIN";
         
-        // Add Content Security Policy for Swagger UI
+        // Add Content Security Policy for Swagger UI - Support both HTTP and HTTPS
         context.Response.Headers["Content-Security-Policy"] = 
             "default-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
             "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
             "style-src 'self' 'unsafe-inline'; " +
             "img-src 'self' data:; " +
             "font-src 'self' data:; " +
-            "connect-src 'self' http://localhost:* https://localhost:*;";
+            "connect-src 'self' http://*:* https://*:* http://localhost:* https://localhost:* http://127.0.0.1:* https://127.0.0.1:* http://192.168.*:* https://192.168.*:* http://10.*:* https://10.*:* http://172.*:* https://172.*:*;";
     }
     
-    // Handle preflight requests for CORS
+    // Handle preflight requests for CORS - Enhanced for Chrome/Firefox
     if (context.Request.Method == "OPTIONS")
     {
-        context.Response.Headers["Access-Control-Allow-Origin"] = "*";
-        context.Response.Headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS";
-        context.Response.Headers["Access-Control-Allow-Headers"] = "*";
+        var origin = context.Request.Headers.Origin.ToString();
+        context.Response.Headers["Access-Control-Allow-Origin"] = string.IsNullOrEmpty(origin) ? "*" : origin;
+        context.Response.Headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH";
+        context.Response.Headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With, Accept, Origin, Access-Control-Request-Method, Access-Control-Request-Headers";
+        context.Response.Headers["Access-Control-Allow-Credentials"] = "true";
         context.Response.Headers["Access-Control-Max-Age"] = "86400";
+        context.Response.Headers["Vary"] = "Origin";
         context.Response.StatusCode = 200;
         return;
+    }
+    
+    // Add CORS headers for all requests - Chrome/Firefox compatibility
+    var requestOrigin = context.Request.Headers.Origin.ToString();
+    if (!string.IsNullOrEmpty(requestOrigin))
+    {
+        context.Response.Headers["Access-Control-Allow-Origin"] = requestOrigin;
+        context.Response.Headers["Access-Control-Allow-Credentials"] = "true";
+        context.Response.Headers["Vary"] = "Origin";
     }
     
     // Log request with origin
