@@ -2,8 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using MauricioGym.Infra.Shared.Interfaces;
 using MauricioGym.Usuario.Entities;
 using MauricioGym.Usuario.Services.Interfaces;
-using MauricioGym.Infra.Services.Interfaces;
-using MauricioGym.Infra.Entities;
+using MauricioGym.Infra.Controller;
 
 namespace MauricioGym.Usuario.API.Controllers
 {
@@ -13,15 +12,13 @@ namespace MauricioGym.Usuario.API.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Produces("application/json")]
-    public class UsuarioController : ControllerBase
+    public class UsuarioController : ApiController
     {
         private readonly IUsuarioService _usuarioService;
-        private readonly IJwtService _jwtService;
 
-        public UsuarioController(IUsuarioService usuarioService, IJwtService jwtService)
+        public UsuarioController(IUsuarioService usuarioService)
         {
             _usuarioService = usuarioService;
-            _jwtService = jwtService;
         }
 
         /// <summary>
@@ -39,9 +36,9 @@ namespace MauricioGym.Usuario.API.Controllers
             var resultado = await _usuarioService.IncluirUsuarioAsync(usuario);
             
             if (resultado.OcorreuErro)
-                return BadRequest(new { erro = resultado.MensagemErro });
+                return BadRequest(resultado.MensagemErro);
 
-            return CreatedAtAction(nameof(ConsultarUsuario), new { id = resultado.Retorno }, new { id = resultado.Retorno });
+            return Ok(resultado.Retorno);
         }
 
         /// <summary>
@@ -61,7 +58,7 @@ namespace MauricioGym.Usuario.API.Controllers
             var resultado = await _usuarioService.ConsultarUsuarioAsync(id);
             
             if (resultado.OcorreuErro)
-                return BadRequest(new { erro = resultado.MensagemErro });
+                return BadRequest(resultado.MensagemErro);
 
             if (resultado.Retorno == null)
                 return NotFound();
@@ -86,7 +83,7 @@ namespace MauricioGym.Usuario.API.Controllers
             var resultado = await _usuarioService.ConsultarUsuarioPorEmailAsync(email);
             
             if (resultado.OcorreuErro)
-                return BadRequest(new { erro = resultado.MensagemErro });
+                return BadRequest(resultado.MensagemErro);
 
             if (resultado.Retorno == null)
                 return NotFound();
@@ -111,7 +108,7 @@ namespace MauricioGym.Usuario.API.Controllers
             var resultado = await _usuarioService.ConsultarUsuarioPorCPFAsync(cpf);
             
             if (resultado.OcorreuErro)
-                return BadRequest(new { erro = resultado.MensagemErro });
+                return BadRequest(resultado.MensagemErro);
 
             if (resultado.Retorno == null)
                 return NotFound();
@@ -138,9 +135,9 @@ namespace MauricioGym.Usuario.API.Controllers
             var resultado = await _usuarioService.AlterarUsuarioAsync(usuario);
             
             if (resultado.OcorreuErro)
-                return BadRequest(new { erro = resultado.MensagemErro });
+                return BadRequest(resultado.MensagemErro);
 
-            return NoContent();
+            return Ok();
         }
 
         /// <summary>
@@ -158,9 +155,9 @@ namespace MauricioGym.Usuario.API.Controllers
             var resultado = await _usuarioService.ExcluirUsuarioAsync(id);
             
             if (resultado.OcorreuErro)
-                return BadRequest(new { erro = resultado.MensagemErro });
+                return BadRequest(resultado.MensagemErro);
 
-            return NoContent();
+            return Ok();
         }
 
         /// <summary>
@@ -177,7 +174,7 @@ namespace MauricioGym.Usuario.API.Controllers
             var resultado = await _usuarioService.ListarUsuariosAsync();
             
             if (resultado.OcorreuErro)
-                return BadRequest(new { erro = resultado.MensagemErro });
+                return BadRequest(resultado.MensagemErro);
 
             return Ok(resultado.Retorno);
         }
@@ -196,71 +193,15 @@ namespace MauricioGym.Usuario.API.Controllers
             var resultado = await _usuarioService.ListarUsuariosAtivosAsync();
             
             if (resultado.OcorreuErro)
-                return BadRequest(new { erro = resultado.MensagemErro });
+                return BadRequest(resultado.MensagemErro);
 
             return Ok(resultado.Retorno);
         }
 
-        /// <summary>
-        /// Realiza login do usuário
-        /// </summary>
-        /// <param name="request">Dados de login (email e senha)</param>
-        /// <returns>Token JWT e dados do usuário autenticado</returns>
-        /// <response code="200">Login realizado com sucesso</response>
-        /// <response code="401">Credenciais inválidas</response>
-        /// <response code="400">Erro na validação</response>
-        [HttpPost("login")]
-        [ProducesResponseType(typeof(object), 200)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(typeof(object), 400)]
-        public async Task<IActionResult> Login([FromBody] LoginRequest request)
-        {
-            var resultado = await _usuarioService.ValidarLoginAsync(request.Email, request.Senha);
-            
-            if (resultado.OcorreuErro)
-                return BadRequest(new { erro = resultado.MensagemErro });
-
-            if (!resultado.Retorno)
-                return Unauthorized(new { erro = "Credenciais inválidas" });
-
-            var usuarioResultado = await _usuarioService.ConsultarUsuarioPorEmailAsync(request.Email);
-            
-            if (usuarioResultado.OcorreuErro || usuarioResultado.Retorno == null)
-                return BadRequest(new { erro = "Erro ao buscar dados do usuário" });
-
-            // Converter UsuarioEntity para Usuario (Infra.Entities)
-            var usuario = new MauricioGym.Infra.Entities.Usuario
-            {
-                Id = usuarioResultado.Retorno.IdUsuario,
-                Nome = usuarioResultado.Retorno.Nome,
-                Email = usuarioResultado.Retorno.Email
-            };
-
-            var token = _jwtService.GenerateToken(usuario);
-            var expiresAt = _jwtService.GetTokenExpiration();
-
-            return Ok(new
-            {
-                token = token,
-                usuario = usuarioResultado.Retorno,
-                expiresAt = expiresAt
-            });
-        }
+        // Métodos de autenticação foram movidos para MauricioGym.Seguranca.Api
+        // - Login: POST /api/autenticacao/login
+        // - ValidateToken: POST /api/autenticacao/validate-token
     }
 
-    /// <summary>
-    /// Dados para requisição de login
-    /// </summary>
-    public class LoginRequest
-    {
-        /// <summary>
-        /// Email do usuário
-        /// </summary>
-        public string Email { get; set; } = string.Empty;
-        
-        /// <summary>
-        /// Senha do usuário
-        /// </summary>
-        public string Senha { get; set; } = string.Empty;
-    }
+    // LoginRequest foi movido para MauricioGym.Seguranca.Api
 }

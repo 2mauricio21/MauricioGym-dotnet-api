@@ -133,38 +133,6 @@ namespace MauricioGym.Usuario.Services
             return new ResultadoValidacao<IEnumerable<UsuarioEntity>>(usuarios);
         }
 
-        public async Task<IResultadoValidacao<bool>> ValidarLoginAsync(string email, string senha)
-        {
-            if (string.IsNullOrWhiteSpace(email))
-                return new ResultadoValidacao<bool>("Email é obrigatório.");
-
-            if (string.IsNullOrWhiteSpace(senha))
-                return new ResultadoValidacao<bool>("Senha é obrigatória.");
-
-            var usuario = await usuarioSqlServerRepository.ConsultarUsuarioPorEmailAsync(email);
-            if (usuario == null || !usuario.Ativo)
-                return new ResultadoValidacao<bool>("Usuário não encontrado ou inativo.");
-
-            // Verificar senha usando hash SHA256
-            var senhaValida = hashService.VerifyHash(senha, usuario.Senha);
-            
-            if (senhaValida)
-            {
-                usuario.DataUltimoLogin = DateTime.Now;
-                await usuarioSqlServerRepository.AlterarUsuarioAsync(usuario);
-                
-                await auditoriaService.IncluirAuditoriaAsync(
-                    usuario.IdUsuario, 
-                    "Login realizado com sucesso");
-            }
-            else
-            {
-                await auditoriaService.IncluirAuditoriaAsync(
-                    usuario.IdUsuario, 
-                    "Tentativa de login falhou");
-            }
-
-            return new ResultadoValidacao<bool>(senhaValida);
-        }
+        // ValidarLoginAsync foi movido para MauricioGym.Seguranca.Services.AutenticacaoService
     }
 }

@@ -17,6 +17,6 @@ namespace MauricioGym.Usuario.Services.Interfaces
         Task<IResultadoValidacao> ExcluirUsuarioAsync(int idUsuario);
         Task<IResultadoValidacao<IEnumerable<UsuarioEntity>>> ListarUsuariosAsync();
         Task<IResultadoValidacao<IEnumerable<UsuarioEntity>>> ListarUsuariosAtivosAsync();
-        Task<IResultadoValidacao<bool>> ValidarLoginAsync(string email, string senha);
+        // ValidarLoginAsync foi movido para MauricioGym.Seguranca.Services.IAutenticacaoService
     }
 }
