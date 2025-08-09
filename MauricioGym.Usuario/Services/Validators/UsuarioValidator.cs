@@ -23,9 +23,6 @@ namespace MauricioGym.Usuario.Services.Validators
             if (string.IsNullOrWhiteSpace(usuario.CPF))
                 return new ResultadoValidacao("O CPF é obrigatório.");
 
-            if (string.IsNullOrWhiteSpace(usuario.Senha))
-                return new ResultadoValidacao("A senha é obrigatória.");
-
             if (!string.IsNullOrEmpty(usuario.Email) && !IsValidEmail(usuario.Email))
                 return new ResultadoValidacao("Email inválido.");
 
