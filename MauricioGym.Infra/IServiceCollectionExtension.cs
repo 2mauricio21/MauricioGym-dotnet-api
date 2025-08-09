@@ -44,5 +44,48 @@ namespace MauricioGym.Infra
             
             return services;
         }
+
+        /// <summary>
+        /// Configura CORS de forma centralizada para todas as APIs do sistema
+        /// </summary>
+        /// <param name="services">Collection de serviços</param>
+        /// <returns>IServiceCollection configurado</returns>
+        public static IServiceCollection ConfigureCorsPolicy(this IServiceCollection services)
+        {
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", policy =>
+                {
+                    policy.WithOrigins(
+                            // Frontend Angular
+                            "http://localhost:4200",
+                            "https://localhost:4200",
+                            "http://127.0.0.1:4200",
+                            "https://127.0.0.1:4200",
+                            // Gateway API
+                            "http://localhost:8000",
+                            "https://localhost:8001",
+                            "http://127.0.0.1:8000",
+                            "https://127.0.0.1:8001",
+                            // APIs individuais (para desenvolvimento)
+                            "http://localhost:5001", "https://localhost:7001", // Usuario API
+                            "http://localhost:5002", "https://localhost:7002", // Academia API
+                            "http://localhost:5003", "https://localhost:7003", // Acesso API
+                            "http://localhost:5004", "https://localhost:7004", // Pagamento API
+                            "http://localhost:5005", "https://localhost:7005", // Plano API
+                            "http://127.0.0.1:5001", "https://127.0.0.1:7001",
+                            "http://127.0.0.1:5002", "https://127.0.0.1:7002",
+                            "http://127.0.0.1:5003", "https://127.0.0.1:7003",
+                            "http://127.0.0.1:5004", "https://127.0.0.1:7004",
+                            "http://127.0.0.1:5005", "https://127.0.0.1:7005"
+                          )
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .AllowCredentials();
+                });
+            });
+
+            return services;
+        }
     }
 }
