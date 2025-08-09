@@ -14,26 +14,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Add CORS
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", policy =>
-    {
-        policy.WithOrigins(
-                "http://localhost:8000",
-                "https://localhost:8001",
-                "http://localhost:5005",
-                "https://localhost:7005",
-                "http://127.0.0.1:8000",
-                "https://127.0.0.1:8001",
-                "http://127.0.0.1:5005",
-                "https://127.0.0.1:7005"
-              )
-              .AllowAnyMethod()
-              .AllowAnyHeader()
-              .AllowCredentials();
-    });
-});
+// Add CORS - Configuração centralizada
+builder.Services.ConfigureCorsPolicy();
 
 // Add Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
