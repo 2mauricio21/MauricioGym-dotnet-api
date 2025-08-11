@@ -31,6 +31,7 @@ namespace MauricioGym.Seguranca.Api.Controllers
         /// <response code="400">Dados inválidos</response>
         /// <response code="401">Credenciais inválidas</response>
         [HttpPost("login")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(object), 200)]
         [ProducesResponseType(typeof(object), 400)]
         [ProducesResponseType(typeof(object), 401)]
@@ -51,6 +52,7 @@ namespace MauricioGym.Seguranca.Api.Controllers
         /// <response code="200">Token válido</response>
         /// <response code="400">Token inválido</response>
         [HttpPost("validate-token")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(object), 200)]
         [ProducesResponseType(typeof(object), 400)]
         public async Task<IActionResult> ValidateToken([FromBody] ValidateTokenRequestEntity request)
@@ -70,6 +72,7 @@ namespace MauricioGym.Seguranca.Api.Controllers
         /// <response code="200">Token renovado com sucesso</response>
         /// <response code="400">Refresh token inválido</response>
         [HttpPost("refresh-token")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(object), 200)]
         [ProducesResponseType(typeof(object), 400)]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestEntity request)

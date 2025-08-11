@@ -2,11 +2,11 @@
   "profiles": {
     "MauricioGym.Seguranca.Api": {
       "commandName": "Project",
-      "launchBrowser": true,
+      "launchBrowser": false,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "https://localhost:51977;http://localhost:51978"
+      "applicationUrl": "http://localhost:5000"
     }
   }
 }

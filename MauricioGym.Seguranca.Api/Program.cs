@@ -5,10 +5,6 @@ using MauricioGym.Infra.Services.Interfaces;
 using MauricioGym.Infra.Services;
 using MauricioGym.Infra.Repositories.SqlServer.Interfaces;
 using MauricioGym.Infra.Repositories.SqlServer;
-using MauricioGym.Seguranca.Repositories.SqlServer.Interfaces;
-using MauricioGym.Seguranca.Repositories.SqlServer;
-using MauricioGym.Seguranca.Services.Interfaces;
-using MauricioGym.Seguranca.Services;
 using MauricioGym.Usuario.Repositories.SqlServer.Interfaces;
 using MauricioGym.Usuario.Repositories.SqlServer;
 using MauricioGym.Usuario.Services.Interfaces;
@@ -17,6 +13,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using MauricioGym.Infra;
+using MauricioGym.Seguranca;
+using MauricioGym.Usuario;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,28 +56,17 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
+        policy.WithOrigins("http://localhost:4200", "http://localhost:8000")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
     });
 });
 
-// Registro de dependências - Infra
-builder.Services.AddScoped<IJwtService, JwtService>();
-builder.Services.AddScoped<IAuditoriaSqlServerRepository, AuditoriaSqlServerRepository>();
-builder.Services.AddScoped<IAuditoriaService, AuditoriaService>();
-builder.Services.AddScoped<IHashService, HashService>();
-
-// Registro de dependências - Segurança
-builder.Services.AddScoped<IAutenticacaoSqlServerRepository, AutenticacaoSqlServerRepository>();
-builder.Services.AddScoped<IRecuperacaoSenhaSqlServerRepository, RecuperacaoSenhaSqlServerRepository>();
-builder.Services.AddScoped<IAutenticacaoService, AutenticacaoService>();
-builder.Services.AddScoped<IRecuperacaoSenhaService, RecuperacaoSenhaService>();
-
-// Registro de dependências - Usuário
-builder.Services.AddScoped<IUsuarioSqlServerRepository, UsuarioSqlServerRepository>();
-builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+// Configuração de serviços por módulo
+builder.Services.ConfigureServicesInfra(builder.Configuration);
+builder.Services.ConfigureServicesSeguranca(builder.Configuration);
+builder.Services.ConfigureServicesCadastroUsuario(builder.Configuration);
 
 var app = builder.Build();
 

@@ -61,6 +61,34 @@ BEGIN
 END
 GO
 
+-- Tabela Autenticacao
+IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Autenticacao' AND xtype='U')
+BEGIN
+    CREATE TABLE Autenticacao (
+        IdAutenticacao INT IDENTITY(1,1) PRIMARY KEY,
+        IdUsuario INT NOT NULL,
+        Email NVARCHAR(255) NOT NULL,
+        Senha NVARCHAR(255) NOT NULL,
+        TokenRecuperacao NVARCHAR(500) NULL,
+        DataExpiracaoToken DATETIME NULL,
+        TentativasLogin INT NOT NULL DEFAULT 0,
+        ContaBloqueada BIT NOT NULL DEFAULT 0,
+        DataBloqueio DATETIME NULL,
+        DataUltimaTentativa DATETIME NULL,
+        RefreshToken NVARCHAR(500) NULL,
+        DataExpiracaoRefreshToken DATETIME NULL,
+        Ativo BIT NOT NULL DEFAULT 1,
+        DataCriacao DATETIME NOT NULL DEFAULT GETDATE(),
+        DataUltimoLogin DATETIME NULL,
+        
+        CONSTRAINT FK_Autenticacao_Usuario FOREIGN KEY (IdUsuario) REFERENCES Usuarios(IdUsuario),
+        CONSTRAINT UQ_Autenticacao_Email UNIQUE (Email),
+        CONSTRAINT UQ_Autenticacao_Usuario UNIQUE (IdUsuario)
+    );
+    PRINT 'Tabela Autenticacao criada.';
+END
+GO
+
 -- Tabela Recursos
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Recursos' AND xtype='U')
 BEGIN
@@ -329,6 +357,20 @@ IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Usuarios_CPF')
 IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Usuarios_Ativo')
     CREATE INDEX IX_Usuarios_Ativo ON Usuarios(Ativo);
 
+-- Índices para Autenticacao
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Autenticacao_Email')
+    CREATE INDEX IX_Autenticacao_Email ON Autenticacao(Email);
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Autenticacao_Usuario')
+    CREATE INDEX IX_Autenticacao_Usuario ON Autenticacao(IdUsuario);
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Autenticacao_RefreshToken')
+    CREATE INDEX IX_Autenticacao_RefreshToken ON Autenticacao(RefreshToken);
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Autenticacao_TokenRecuperacao')
+    CREATE INDEX IX_Autenticacao_TokenRecuperacao ON Autenticacao(TokenRecuperacao);
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Autenticacao_ContaBloqueada')
+    CREATE INDEX IX_Autenticacao_ContaBloqueada ON Autenticacao(ContaBloqueada);
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Autenticacao_Ativo')
+    CREATE INDEX IX_Autenticacao_Ativo ON Autenticacao(Ativo);
+
 -- Índices para Recursos
 IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Recursos_Codigo')
     CREATE INDEX IX_Recursos_Codigo ON Recursos(Codigo);
@@ -495,7 +537,12 @@ BEGIN
     INSERT INTO UsuarioRecursos (IdUsuario, IdRecurso, IdAcademia, Ativo)
     VALUES (@IdUsuarioAdmin, @IdRecursoAdmin, NULL, 1);
     
+    -- Criar registro de autenticação para o usuário administrador
+    INSERT INTO Autenticacao (IdUsuario, Email, Senha, TentativasLogin, ContaBloqueada, Ativo)
+    VALUES (@IdUsuarioAdmin, 'admin@mauriciogym.com', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 0, 0, 1);
+    
     PRINT 'Permissão de administrador global atribuída.';
+    PRINT 'Registro de autenticação criado para o administrador.';
 END
 ELSE
 BEGIN
@@ -554,7 +601,7 @@ DECLARE @TabelasCriadas INT = (
     SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES 
     WHERE TABLE_TYPE = 'BASE TABLE' 
     AND TABLE_NAME IN (
-        'Usuarios', 'Recursos', 'UsuarioRecursos', 
+        'Usuarios', 'Autenticacao', 'Recursos', 'UsuarioRecursos', 
         'Academias', 'UsuarioAcademias', 
         'Planos', 'UsuarioPlanos', 
         'FormasPagamento', 'Pagamentos', 
@@ -563,13 +610,13 @@ DECLARE @TabelasCriadas INT = (
     )
 );
 
-IF @TabelasCriadas = 12
+IF @TabelasCriadas = 13
 BEGIN
-    PRINT 'SUCESSO: Todas as 12 tabelas foram criadas corretamente.';
+    PRINT 'SUCESSO: Todas as 13 tabelas foram criadas corretamente.';
 END
 ELSE
 BEGIN
-    PRINT 'ATENÇÃO: Apenas ' + CAST(@TabelasCriadas AS VARCHAR(2)) + ' de 12 tabelas foram criadas.';
+    PRINT 'ATENÇÃO: Apenas ' + CAST(@TabelasCriadas AS VARCHAR(2)) + ' de 13 tabelas foram criadas.';
 END
 GO
 
@@ -592,7 +639,7 @@ PRINT '=============================================';
 PRINT '';
 PRINT 'INFORMAÇÕES IMPORTANTES:';
 PRINT '- Banco: MauricioGymDB';
-PRINT '- Tabelas: 12 tabelas criadas';
+PRINT '- Tabelas: 13 tabelas criadas (incluindo Autenticacao)';
 PRINT '- Índices: Todos os índices de performance criados';
 PRINT '- Usuário Admin: admin@mauriciogym.com';
 PRINT '- Senha Admin: admin123 (ALTERE IMEDIATAMENTE!)';

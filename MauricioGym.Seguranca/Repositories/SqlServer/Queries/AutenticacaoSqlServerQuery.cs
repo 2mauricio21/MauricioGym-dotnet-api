@@ -9,8 +9,12 @@ namespace MauricioGym.Seguranca.Repositories.SqlServer.Queries
             (@Email, @Senha, @IdUsuario, @TentativasLogin, @ContaBloqueada, @DataCriacao, @Ativo);
             SELECT CAST(SCOPE_IDENTITY() as int)";
 
-        public static string ConsultarAutenticacaoPorEmail => @"
-            SELECT * FROM Autenticacao 
+        public static readonly string ConsultarAutenticacaoPorEmail = @"
+            SELECT 
+                IdAutenticacao, IdUsuario, Email, Senha, TentativasLogin, 
+                ContaBloqueada, DataCriacao, DataUltimoLogin, DataUltimaTentativa, 
+                DataBloqueio, RefreshToken, DataExpiracaoRefreshToken, Ativo, TokenRecuperacao
+            FROM Autenticacao 
             WHERE Email = @Email AND Ativo = 1";
 
         public static string ConsultarAutenticacaoPorUsuario => @"

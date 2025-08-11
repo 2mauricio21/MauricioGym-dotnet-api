@@ -40,7 +40,7 @@ namespace MauricioGym.Infra
             
             // Services
             services.AddTransient<IAuditoriaService, AuditoriaService>();
-            services.AddTransient<IHashService, HashService>();
+            services.AddTransient<IJwtService, JwtService>();
             
             return services;
         }

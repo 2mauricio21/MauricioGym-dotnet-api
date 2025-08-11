@@ -22,7 +22,9 @@ namespace MauricioGym.Infra.SQLServer
 
         public SQLServerDbContext(IOptions<SQLServerConnectionOptions> options)
         {
-            Connection = new SqlConnection(AppConfig.SqlServerConnectionString);
+            var connectionString = AppConfig.SqlServerConnectionString;
+            Console.WriteLine($"[DEBUG] Connection String: {connectionString}");
+            Connection = new SqlConnection(connectionString);
         }
 
 

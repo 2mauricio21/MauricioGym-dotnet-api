@@ -9,7 +9,6 @@ using MauricioGym.Seguranca.Entities;
 using MauricioGym.Usuario.Services.Interfaces;
 using MauricioGym.Infra.Entities;
 using System.Security.Cryptography;
-using System.Text;
 
 namespace MauricioGym.Seguranca.Services
 {
@@ -21,17 +20,20 @@ namespace MauricioGym.Seguranca.Services
         private readonly IAutenticacaoSqlServerRepository _autenticacaoRepository;
         private readonly IUsuarioService _usuarioService;
         private readonly IJwtService _jwtService;
+        private readonly IHashService _hashService;
         private const int MAX_TENTATIVAS_LOGIN = 5;
         private const int TEMPO_BLOQUEIO_MINUTOS = 30;
 
         public AutenticacaoService(
             IAutenticacaoSqlServerRepository autenticacaoRepository,
             IUsuarioService usuarioService,
-            IJwtService jwtService)
+            IJwtService jwtService,
+            IHashService hashService)
         {
             _autenticacaoRepository = autenticacaoRepository;
             _usuarioService = usuarioService;
             _jwtService = jwtService;
+            _hashService = hashService;
         }
 
         public async Task<IResultadoValidacao<string>> LoginAsync(string email, string senha)
@@ -72,7 +74,7 @@ namespace MauricioGym.Seguranca.Services
                 }
 
                 // Verificar senha
-                var senhaHash = GerarHashSenha(senha);
+                var senhaHash = _hashService.GerarHashSHA256(senha);
                 if (autenticacao.Senha != senhaHash)
                 {
                     // Incrementar tentativas de login
@@ -275,12 +277,12 @@ namespace MauricioGym.Seguranca.Services
                 var autenticacao = autenticacaoResult.Retorno;
 
                 // Verificar senha atual
-                var senhaAtualHash = GerarHashSenha(senhaAtual);
+                var senhaAtualHash = _hashService.GerarHashSHA256(senhaAtual);
                 if (autenticacao.Senha != senhaAtualHash)
                     return new ResultadoValidacao("Senha atual incorreta");
 
                 // Alterar senha
-                var novaSenhaHash = GerarHashSenha(novaSenha);
+                var novaSenhaHash = _hashService.GerarHashSHA256(novaSenha);
                 var resultado = await _autenticacaoRepository.AlterarSenhaAsync(idUsuario, novaSenhaHash);
                 if (resultado.OcorreuErro)
                     return new ResultadoValidacao(resultado.MensagemErro);
@@ -293,12 +295,7 @@ namespace MauricioGym.Seguranca.Services
             }
         }
 
-        private static string GerarHashSenha(string senha)
-        {
-            using var sha256 = SHA256.Create();
-            var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(senha));
-            return Convert.ToBase64String(hashedBytes);
-        }
+
 
         private static string GerarRefreshToken()
         {
