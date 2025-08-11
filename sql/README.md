@@ -6,8 +6,7 @@ Este diretório contém os scripts SQL necessários para configurar o banco de d
 
 ## 📁 Arquivos
 
-- **`create-database-complete.sql`** - Script principal de criação do banco
-- **`verificar-banco.sql`** - Script de verificação da instalação
+- **`create-database-complete.sql`** - Script principal de criação completa do banco de dados
 - **`README.md`** - Esta documentação
 
 ## 🚀 Instalação Rápida
@@ -22,8 +21,7 @@ Este diretório contém os scripts SQL necessários para configurar o banco de d
 
 1. **Abra o SSMS** e conecte no servidor
 2. **Execute**: `create-database-complete.sql`
-3. **Verifique**: `verificar-banco.sql`
-4. **Pronto!** Sistema configurado
+3. **Pronto!** Sistema configurado com todas as tabelas e dados iniciais
 
 ## 📊 Estrutura do Banco
 
