@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 
 namespace MauricioGym.Infra.Config
 {
@@ -13,7 +13,7 @@ namespace MauricioGym.Infra.Config
         public static string AUDIENCE_JWT => "mauriciogym.app";
 
         public static string SqlServerConnectionString => GetConfiguration()["ConnectionStrings:DefaultConnection"] ?? 
-            "Server=(localdb)\\mssqllocaldb;Database=MauricioGymDB;Trusted_Connection=True;";
+            "Server=localhost;Database=MauricioGymDB;Trusted_Connection=true;TrustServerCertificate=true;";
 
         private static IConfiguration GetConfiguration()
         {

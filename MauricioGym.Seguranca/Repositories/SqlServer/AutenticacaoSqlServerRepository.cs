@@ -36,8 +36,8 @@ namespace MauricioGym.Seguranca.Repositories.SqlServer
                 p.Add("@DataCriacao", autenticacao.DataCriacao);
                 p.Add("@Ativo", autenticacao.Ativo);
                 
-                var id = (await QueryAsync<int>(sql, p)).FirstOrDefault();
-                return new ResultadoValidacao<int>(id);
+                var idAutenticacao = (await QueryAsync<int>(sql, p)).Single();
+                return new ResultadoValidacao<int>(idAutenticacao);
             }
             catch (Exception ex)
             {
@@ -49,7 +49,12 @@ namespace MauricioGym.Seguranca.Repositories.SqlServer
         {
             try
             {
-                var sql = AutenticacaoSqlServerQuery.ConsultarAutenticacaoPorEmail;
+                var sql = @"SELECT 
+                    IdAutenticacao, IdUsuario, Email, Senha, TentativasLogin, 
+                    ContaBloqueada, DataCriacao, DataUltimoLogin, DataUltimaTentativa, 
+                    DataBloqueio, RefreshToken, DataExpiracaoRefreshToken, Ativo, TokenRecuperacao
+                FROM Autenticacao 
+                WHERE Email = @Email AND Ativo = 1";
 
                 var p = new DynamicParameters();
                 p.Add("@Email", email);
@@ -67,7 +72,12 @@ namespace MauricioGym.Seguranca.Repositories.SqlServer
         {
             try
             {
-                var sql = AutenticacaoSqlServerQuery.ConsultarAutenticacaoPorUsuario;
+                var sql = @"SELECT 
+                    IdAutenticacao, IdUsuario, Email, Senha, TentativasLogin, 
+                    ContaBloqueada, DataCriacao, DataUltimoLogin, DataUltimaTentativa, 
+                    DataBloqueio, RefreshToken, DataExpiracaoRefreshToken, Ativo, TokenRecuperacao
+                FROM Autenticacao 
+                WHERE IdUsuario = @IdUsuario AND Ativo = 1";
 
                 var p = new DynamicParameters();
                 p.Add("@IdUsuario", idUsuario);
@@ -85,7 +95,9 @@ namespace MauricioGym.Seguranca.Repositories.SqlServer
         {
             try
             {
-                var sql = AutenticacaoSqlServerQuery.AlterarSenha;
+                var sql = @"UPDATE Autenticacao 
+                    SET Senha = @NovaSenha
+                    WHERE IdUsuario = @IdUsuario";
 
                 var p = new DynamicParameters();
                 p.Add("@NovaSenha", novaSenha);
@@ -104,7 +116,9 @@ namespace MauricioGym.Seguranca.Repositories.SqlServer
         {
             try
             {
-                var sql = AutenticacaoSqlServerQuery.AtualizarTentativasLogin;
+                var sql = @"UPDATE Autenticacao 
+                    SET TentativasLogin = @Tentativas, DataUltimaTentativa = GETDATE()
+                    WHERE IdUsuario = @IdUsuario";
 
                 var p = new DynamicParameters();
                 p.Add("@Tentativas", tentativas);
@@ -123,7 +137,9 @@ namespace MauricioGym.Seguranca.Repositories.SqlServer
         {
             try
             {
-                var sql = AutenticacaoSqlServerQuery.BloquearConta;
+                var sql = @"UPDATE Autenticacao 
+                    SET ContaBloqueada = 1, DataBloqueio = GETDATE()
+                    WHERE IdUsuario = @IdUsuario";
 
                 var p = new DynamicParameters();
                 p.Add("@IdUsuario", idUsuario);
@@ -141,7 +157,9 @@ namespace MauricioGym.Seguranca.Repositories.SqlServer
         {
             try
             {
-                var sql = AutenticacaoSqlServerQuery.DesbloquearConta;
+                var sql = @"UPDATE Autenticacao 
+                    SET ContaBloqueada = 0, TentativasLogin = 0, DataBloqueio = NULL
+                    WHERE IdUsuario = @IdUsuario";
 
                 var p = new DynamicParameters();
                 p.Add("@IdUsuario", idUsuario);
@@ -159,7 +177,9 @@ namespace MauricioGym.Seguranca.Repositories.SqlServer
         {
             try
             {
-                var sql = AutenticacaoSqlServerQuery.AtualizarUltimoLogin;
+                var sql = @"UPDATE Autenticacao 
+                    SET DataUltimoLogin = GETDATE()
+                    WHERE IdUsuario = @IdUsuario";
 
                 var p = new DynamicParameters();
                 p.Add("@IdUsuario", idUsuario);
@@ -177,7 +197,9 @@ namespace MauricioGym.Seguranca.Repositories.SqlServer
         {
             try
             {
-                var sql = AutenticacaoSqlServerQuery.AtualizarRefreshToken;
+                var sql = @"UPDATE Autenticacao 
+                    SET RefreshToken = @RefreshToken, DataExpiracaoRefreshToken = @DataExpiracao
+                    WHERE IdUsuario = @IdUsuario";
 
                 var p = new DynamicParameters();
                 p.Add("@RefreshToken", refreshToken);
@@ -197,7 +219,9 @@ namespace MauricioGym.Seguranca.Repositories.SqlServer
         {
             try
             {
-                var sql = AutenticacaoSqlServerQuery.RemoverRefreshToken;
+                var sql = @"UPDATE Autenticacao 
+                    SET RefreshToken = NULL, DataExpiracaoRefreshToken = NULL
+                    WHERE IdUsuario = @IdUsuario";
 
                 var p = new DynamicParameters();
                 p.Add("@IdUsuario", idUsuario);
@@ -215,7 +239,12 @@ namespace MauricioGym.Seguranca.Repositories.SqlServer
         {
             try
             {
-                var sql = AutenticacaoSqlServerQuery.ConsultarPorRefreshToken;
+                var sql = @"SELECT 
+                    IdAutenticacao, IdUsuario, Email, Senha, TentativasLogin, 
+                    ContaBloqueada, DataCriacao, DataUltimoLogin, DataUltimaTentativa, 
+                    DataBloqueio, RefreshToken, DataExpiracaoRefreshToken, Ativo, TokenRecuperacao
+                FROM Autenticacao 
+                WHERE RefreshToken = @RefreshToken AND Ativo = 1";
 
                 var p = new DynamicParameters();
                 p.Add("@RefreshToken", refreshToken);

@@ -25,6 +25,7 @@ namespace MauricioGym.Seguranca.Api.Controllers
         /// <param name="request">Email para recuperação</param>
         /// <returns>Confirmação da solicitação</returns>
         [HttpPost("solicitar")]
+        [AllowAnonymous]
         public async Task<IActionResult> SolicitarRecuperacao([FromBody] SolicitarRecuperacaoRequestDto request)
         {
             try
@@ -62,6 +63,7 @@ namespace MauricioGym.Seguranca.Api.Controllers
         /// <param name="request">Token a ser validado</param>
         /// <returns>Confirmação se o token é válido</returns>
         [HttpPost("validar-token")]
+        [AllowAnonymous]
         public async Task<IActionResult> ValidarToken([FromBody] ValidarTokenRecuperacaoRequestDto request)
         {
             try
@@ -89,6 +91,7 @@ namespace MauricioGym.Seguranca.Api.Controllers
         /// <param name="request">Token e nova senha</param>
         /// <returns>Confirmação da redefinição</returns>
         [HttpPost("redefinir")]
+        [AllowAnonymous]
         public async Task<IActionResult> RedefinirSenha([FromBody] RedefinirSenhaRequestDto request)
         {
             try

@@ -29,7 +29,8 @@ public class SwaggerAggregationService
                 Description = @"Gateway unificado para todas as APIs do sistema MauricioGym.
         
 **Domínios Disponíveis:**
-- **Usuários** (/api/usuario): Gerenciamento de usuários, autenticação e perfis
+- **Segurança** (/api/seguranca, /api/autenticacao, /api/cadastro, /api/recuperacao-senha): Autenticação, cadastro e recuperação de senha
+- **Usuários** (/api/usuario): Gerenciamento de usuários e perfis
 - **Academias** (/api/academia, /api/usuarioacademia): Gerenciamento de academias e associações
 - **Controle de Acesso** (/api/acesso, /api/bloqueio): Controle de entrada e bloqueios
 - **Pagamentos** (/api/pagamento, /api/formapagamento): Gestão financeira e formas de pagamento
@@ -97,6 +98,7 @@ Exemplo: 'Bearer 12345abcdef'",
         // APIs to aggregate
         var apis = new Dictionary<string, string>
         {
+            { "Seguranca", "http://localhost:5000" },
             { "Usuario", "http://localhost:5001" },
             { "Academia", "http://localhost:5002" },
             { "Acesso", "http://localhost:5003" },
@@ -305,6 +307,7 @@ Exemplo: 'Bearer 12345abcdef'",
     {
         return apiName switch
         {
+            "Seguranca" => "🔐 Segurança",
             "Usuario" => "👤 Usuários",
             "Academia" => "🏋️ Academias",
             "Acesso" => "🔐 Controle de Acesso",

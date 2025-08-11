@@ -16,16 +16,13 @@ namespace MauricioGym.Usuario.Services
     {
         private readonly IUsuarioSqlServerRepository usuarioSqlServerRepository;
         private readonly IAuditoriaService auditoriaService;
-        private readonly IHashService hashService;
 
         public UsuarioService(
             IUsuarioSqlServerRepository usuarioRepository,
-            IAuditoriaService auditoriaService,
-            IHashService hashService)
+            IAuditoriaService auditoriaService)
         {
             usuarioSqlServerRepository = usuarioRepository ?? throw new ArgumentNullException(nameof(usuarioRepository));
             this.auditoriaService = auditoriaService ?? throw new ArgumentNullException(nameof(auditoriaService));
-            this.hashService = hashService ?? throw new ArgumentNullException(nameof(hashService));
         }
 
         public async Task<IResultadoValidacao<int>> IncluirUsuarioAsync(UsuarioEntity usuario)
