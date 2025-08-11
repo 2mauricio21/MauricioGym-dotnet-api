@@ -25,6 +25,7 @@ namespace MauricioGym.Seguranca
 
             // Repositories
             services.AddTransient<IAutenticacaoSqlServerRepository, AutenticacaoSqlServerRepository>();
+            services.AddTransient<IRecuperacaoSenhaSqlServerRepository, RecuperacaoSenhaSqlServerRepository>();
 
             return services;
         }
