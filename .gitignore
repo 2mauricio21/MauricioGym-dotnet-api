@@ -43,3 +43,18 @@ Thumbs.db
 *.user
 *.userosscache
 *.sln.docstates
+
+# Pastas de logs (não versionar)
+logs/
+log/
+**/logs/
+**/log/
+
+# Arquivos de logs comuns em Markdown (não versionar)
+**/CHANGELOG.md
+**/ChangeLog.md
+**/changelog.md
+**/CHANGE-LOG.md
+**/LOG.md
+**/log.md
+**/logs.md
